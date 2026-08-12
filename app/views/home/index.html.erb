@@ -1,0 +1,67 @@
+<% if logged_in? %>
+  <h1 class="h3 mb-4">ようこそ、<%= current_user.name %>さん</h1>
+
+  <div class="row mb-4">
+    <div class="col-6 col-md-4">
+      <div class="card text-center">
+        <div class="card-body">
+          <div class="display-6"><%= current_user.attempts.count %></div>
+          <div class="text-muted">練習回数</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-4">
+      <div class="card text-center">
+        <div class="card-body">
+          <div class="display-6 text-danger"><%= @review_count %></div>
+          <div class="text-muted">要復習</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="h5 mb-0">カテゴリから練習する</h2>
+    <%= link_to "全てのコードを見る", snippets_path, class: "btn btn-sm btn-outline-secondary" %>
+  </div>
+  <div class="row g-3 mb-4">
+    <% @categories.each do |category| %>
+      <div class="col-12 col-md-4">
+        <%= link_to category_path(category), class: "text-decoration-none" do %>
+          <div class="card h-100">
+            <div class="card-body">
+              <h3 class="h6"><%= category.name %></h3>
+              <p class="text-muted mb-0"><%= category.snippets.size %>個のコード</p>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+
+  <% if @recent_attempts.any? %>
+    <h2 class="h5 mb-3">最近の練習</h2>
+    <ul class="list-group mb-4">
+      <% @recent_attempts.each do |attempt| %>
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          <span><%= attempt.snippet.title %>(<%= attempt.level_label %>)</span>
+          <span class="badge <%= attempt.needs_review? ? 'bg-danger' : 'bg-success' %> rounded-pill">
+            正答率<%= number_with_precision(attempt.accuracy, precision: 0) %>%
+          </span>
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
+
+  <%= link_to "復習ページへ", attempts_path, class: "btn btn-outline-danger" %>
+<% else %>
+  <div class="text-center py-5">
+    <h1 class="display-6 mb-3">重要なRailsコードを、打って覚える。</h1>
+    <p class="lead text-muted mb-4">
+      MVCの基本構文からActiveRecordクエリまで、実務でよく使うRailsコードをタイピング練習で体に覚えさせるアプリです。<br>
+      優しい・普通・難しいの3段階で、自分のレベルに合わせて練習できます。
+    </p>
+    <%= link_to "無料で始める", signup_path, class: "btn btn-primary btn-lg me-2" %>
+    <%= link_to "ログイン", login_path, class: "btn btn-outline-secondary btn-lg" %>
+  </div>
+<% end %>

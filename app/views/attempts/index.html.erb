@@ -1,0 +1,58 @@
+<h1 class="h3 mb-4">復習</h1>
+
+<% if @attempts_by_snippet.empty? %>
+  <p class="text-muted">まだ練習履歴がありません。<%= link_to "コード一覧", snippets_path %>から練習を始めましょう。</p>
+<% else %>
+  <% if @review_snippets.any? %>
+    <h2 class="h5 mb-3 text-danger">要復習(正答率<%= Attempt::REVIEW_THRESHOLD.to_i %>%未満)</h2>
+    <div class="list-group mb-4">
+      <% @review_snippets.each do |snippet| %>
+        <% latest = @attempts_by_snippet[snippet].first %>
+        <div class="list-group-item">
+          <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+              <div class="fw-bold"><%= snippet.title %></div>
+              <span class="badge bg-secondary"><%= snippet.category.name %></span>
+              <span class="badge bg-danger">前回 <%= number_with_precision(latest.accuracy, precision: 0) %>%(<%= latest.level_label %>)</span>
+            </div>
+            <%= link_to "復習する", practice_snippet_path(snippet, level: latest.level), class: "btn btn-sm btn-danger" %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="alert alert-success">要復習のコードはありません。素晴らしい!</div>
+  <% end %>
+
+  <h2 class="h5 mb-3">練習履歴</h2>
+  <div class="table-responsive">
+    <table class="table align-middle">
+      <thead>
+        <tr>
+          <th>コード</th>
+          <th>カテゴリ</th>
+          <th>挑戦回数</th>
+          <th>最高正答率</th>
+          <th>最終挑戦</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @attempts_by_snippet.each do |snippet, attempts| %>
+          <tr>
+            <td><%= link_to snippet.title, snippet_path(snippet) %></td>
+            <td><%= snippet.category.name %></td>
+            <td><%= attempts.size %></td>
+            <td>
+              <span class="badge <%= attempts.map(&:accuracy).max >= Attempt::REVIEW_THRESHOLD ? 'bg-success' : 'bg-danger' %>">
+                <%= number_with_precision(attempts.map(&:accuracy).max, precision: 0) %>%
+              </span>
+            </td>
+            <td class="text-muted small"><%= attempts.first.created_at.strftime("%Y/%m/%d %H:%M") %></td>
+            <td><%= link_to "練習", snippet_path(snippet), class: "btn btn-sm btn-outline-primary" %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% end %>

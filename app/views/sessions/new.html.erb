@@ -1,0 +1,21 @@
+<div class="row justify-content-center">
+  <div class="col-12 col-md-6 col-lg-4">
+    <h1 class="h3 mb-4">ログイン</h1>
+
+    <%= form_with url: login_path, method: :post, local: true do |f| %>
+      <div class="mb-3">
+        <%= f.label :email, "メールアドレス", class: "form-label" %>
+        <%= f.email_field :email, class: "form-control", required: true, autofocus: true %>
+      </div>
+      <div class="mb-3">
+        <%= f.label :password, "パスワード", class: "form-label" %>
+        <%= f.password_field :password, class: "form-control", required: true %>
+      </div>
+      <%= f.submit "ログイン", class: "btn btn-primary w-100" %>
+    <% end %>
+
+    <p class="mt-3 text-center">
+      アカウントをお持ちでない方は<%= link_to "新規登録", signup_path %>
+    </p>
+  </div>
+</div>

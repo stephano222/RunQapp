@@ -1,0 +1,48 @@
+<p><%= link_to "← コード一覧", snippets_path %></p>
+
+<div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-2">
+  <div>
+    <h1 class="h4 mb-1"><%= @snippet.title %></h1>
+    <span class="badge bg-secondary"><%= @snippet.category.name %></span>
+    <% unless @snippet.official? %>
+      <span class="badge bg-info text-dark">自分で追加</span>
+    <% end %>
+  </div>
+  <% if @snippet.editable_by?(current_user) %>
+    <div class="btn-group btn-group-sm">
+      <%= link_to "編集", edit_snippet_path(@snippet), class: "btn btn-outline-secondary" %>
+      <%= button_to "削除", snippet_path(@snippet), method: :delete, class: "btn btn-outline-danger", form: { data: { turbo_confirm: "削除しますか?" } } %>
+    </div>
+  <% end %>
+</div>
+
+<pre class="typing-display mb-3"><%= @snippet.code %></pre>
+
+<% if @snippet.explanation.present? %>
+  <div class="card mb-4">
+    <div class="card-body">
+      <h2 class="h6 card-title">解説</h2>
+      <p class="card-text mb-0" style="white-space: pre-wrap;"><%= @snippet.explanation %></p>
+    </div>
+  </div>
+<% end %>
+
+<div class="d-flex gap-2 flex-wrap mb-4">
+  <%= link_to "優しいレベルで練習", practice_snippet_path(@snippet, level: "easy"), class: "btn btn-success" %>
+  <%= link_to "普通レベルで練習", practice_snippet_path(@snippet, level: "normal"), class: "btn btn-warning" %>
+  <%= link_to "難しいレベルで練習", practice_snippet_path(@snippet, level: "hard"), class: "btn btn-danger" %>
+</div>
+
+<% if @attempts.any? %>
+  <h2 class="h6">最近の挑戦履歴</h2>
+  <ul class="list-group">
+    <% @attempts.each do |attempt| %>
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <span><%= attempt.level_label %> ・ <%= l(attempt.created_at, format: :short) rescue attempt.created_at.strftime("%Y/%m/%d %H:%M") %></span>
+        <span class="badge <%= attempt.needs_review? ? 'bg-danger' : 'bg-success' %> rounded-pill">
+          <%= number_with_precision(attempt.accuracy, precision: 0) %>%
+        </span>
+      </li>
+    <% end %>
+  </ul>
+<% end %>

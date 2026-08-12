@@ -1,0 +1,51 @@
+<p><%= link_to "← #{@snippet.title}に戻る", snippet_path(@snippet) %></p>
+
+<div class="text-center mb-4">
+  <% if @attempt.correct? %>
+    <div class="display-6 text-success mb-1">🎉 パーフェクト!</div>
+  <% elsif @attempt.needs_review?  %>
+    <div class="display-6 text-danger mb-1">もう少し!</div>
+  <% else %>
+    <div class="display-6 text-warning mb-1">よくできました</div>
+  <% end %>
+  <span class="badge bg-secondary"><%= @attempt.level_label %>レベル</span>
+</div>
+
+<div class="row g-3 mb-4 text-center">
+  <div class="col-4">
+    <div class="fs-3 fw-bold"><%= number_with_precision(@attempt.accuracy, precision: 0) %>%</div>
+    <div class="text-muted small">正答率</div>
+  </div>
+  <div class="col-4">
+    <div class="fs-3 fw-bold"><%= @attempt.mistake_count %></div>
+    <div class="text-muted small">ミス数</div>
+  </div>
+  <div class="col-4">
+    <div class="fs-3 fw-bold"><%= number_with_precision(@attempt.duration_ms / 1000.0, precision: 1) %>秒</div>
+    <div class="text-muted small">タイム</div>
+  </div>
+</div>
+
+<h2 class="h6">採点結果</h2>
+<pre class="typing-display mb-4"><% @diff.each do |d| %><span class="char <%= d[:match] ? 'char-correct' : 'char-incorrect' %>"><%= d[:expected] || d[:typed] %></span><% end %></pre>
+
+<% if @snippet.explanation.present? %>
+  <div class="card mb-4">
+    <div class="card-body">
+      <h2 class="h6 card-title">解説</h2>
+      <p class="card-text mb-0" style="white-space: pre-wrap;"><%= @snippet.explanation %></p>
+    </div>
+  </div>
+<% end %>
+
+<% if @attempt.needs_review? %>
+  <div class="alert alert-warning">
+    正答率が<%= Attempt::REVIEW_THRESHOLD.to_i %>%未満なので「復習」に登録されました。もう一度練習してみましょう。
+  </div>
+<% end %>
+
+<div class="d-flex gap-2 flex-wrap">
+  <%= link_to "もう一度(#{@attempt.level_label})", practice_snippet_path(@snippet, level: @attempt.level), class: "btn btn-primary" %>
+  <%= link_to "他のレベルで挑戦", snippet_path(@snippet), class: "btn btn-outline-secondary" %>
+  <%= link_to "復習一覧へ", attempts_path, class: "btn btn-outline-danger" %>
+</div>

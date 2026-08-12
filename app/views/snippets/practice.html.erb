@@ -1,0 +1,68 @@
+<script type="application/json" id="snippet-data"><%= raw({
+  code: @snippet.code,
+  level: @level,
+  snippetId: @snippet.id,
+  csrfToken: form_authenticity_token
+}.to_json.gsub('</', '<\/')) %></script>
+
+<p><%= link_to "← #{@snippet.title}に戻る", snippet_path(@snippet) %></p>
+
+<div id="typing-app">
+  <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+    <div>
+      <h1 class="h5 mb-1"><%= @snippet.title %></h1>
+      <span class="badge <%= { "easy" => "bg-success", "normal" => "bg-warning text-dark", "hard" => "bg-danger" }[@level] %>">
+        <%= { "easy" => "優しい(なぞる)", "normal" => "普通(ヒントあり)", "hard" => "難しい(ノーヒント)" }[@level] %>
+      </span>
+    </div>
+    <div class="d-flex gap-2">
+      <button type="button" id="sound-toggle" class="btn btn-sm btn-outline-secondary"></button>
+      <button type="button" id="reset-button" class="btn btn-sm btn-outline-secondary">やり直す</button>
+    </div>
+  </div>
+
+  <div class="progress mb-3" style="height: 6px;">
+    <div id="progress-bar" class="progress-bar" role="progressbar" style="width: 0%;"></div>
+  </div>
+
+  <div class="row g-3 mb-3">
+    <div class="col-4">
+      <div class="text-center">
+        <div class="fs-5 fw-bold" id="stat-accuracy">100%</div>
+        <div class="small text-muted">正答率</div>
+      </div>
+    </div>
+    <div class="col-4">
+      <div class="text-center">
+        <div class="fs-5 fw-bold" id="stat-mistakes">0</div>
+        <div class="small text-muted">ミス数</div>
+      </div>
+    </div>
+    <div class="col-4">
+      <div class="text-center">
+        <div class="fs-5 fw-bold" id="stat-time">0.0秒</div>
+        <div class="small text-muted">経過時間</div>
+      </div>
+    </div>
+  </div>
+
+  <pre id="target-display" class="typing-display mb-2"></pre>
+  <pre id="typed-display" class="typing-display mb-2 d-none"></pre>
+
+  <textarea
+    id="typing-input"
+    class="form-control typing-input"
+    rows="6"
+    autocomplete="off"
+    autocapitalize="off"
+    autocorrect="off"
+    spellcheck="false"
+    placeholder="ここをタップしてコードを入力してください"
+  ></textarea>
+
+  <% if @level == "normal" %>
+    <p class="small text-muted mt-2">次に打つ1文字だけヒントが表示されます。</p>
+  <% elsif @level == "hard" %>
+    <p class="small text-muted mt-2">お手本は表示されません。記憶を頼りに入力してください。</p>
+  <% end %>
+</div>

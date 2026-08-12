@@ -1,0 +1,16 @@
+<h1 class="h3 mb-4">カテゴリ一覧</h1>
+
+<div class="row g-3">
+  <% @categories.each do |category| %>
+    <div class="col-12 col-md-4">
+      <%= link_to category_path(category), class: "text-decoration-none" do %>
+        <div class="card h-100">
+          <div class="card-body">
+            <h2 class="h6"><%= category.name %></h2>
+            <p class="text-muted mb-0"><%= category.snippets.size %>個のコード</p>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+</div>

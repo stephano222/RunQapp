@@ -1,0 +1,4 @@
+<p><%= link_to "← #{@snippet.title}に戻る", snippet_path(@snippet) %></p>
+<h1 class="h4 mb-4">コードを編集</h1>
+
+<%= render "form", snippet: @snippet %>

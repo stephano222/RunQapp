@@ -1,0 +1,22 @@
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+  <h1 class="h3 mb-0">コード一覧</h1>
+  <%= link_to "＋ 自分のコードを追加", new_snippet_path, class: "btn btn-primary" %>
+</div>
+
+<% @categories.each do |category| %>
+  <% next if category.snippets.empty? %>
+  <h2 class="h5 mt-4 mb-2"><%= category.name %></h2>
+  <div class="list-group mb-3">
+    <% category.snippets.each do |snippet| %>
+      <%= link_to snippet_path(snippet), class: "list-group-item list-group-item-action d-flex justify-content-between align-items-center" do %>
+        <span>
+          <%= snippet.title %>
+          <% unless snippet.official? %>
+            <span class="badge bg-info text-dark ms-1">自分で追加</span>
+          <% end %>
+        </span>
+        <span class="text-muted">›</span>
+      <% end %>
+    <% end %>
+  </div>
+<% end %>
