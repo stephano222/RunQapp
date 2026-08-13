@@ -1,6 +1,12 @@
 # 初期データ: 覚えておきたい重要なRailsコード集
 # 既存の公式コード(user_idがnil)だけを入れ替える。ユーザーが追加したコードは消さない。
 
+# 誰でも試せるテストユーザー(ログイン画面に初めから入力されている)
+test_user = User.find_or_initialize_by(email: "test@example.com")
+test_user.name = "テストユーザー"
+test_user.password = "test1234"
+test_user.save!
+
 mvc = Category.find_or_create_by!(name: "MVCの基本構文") { |c| c.position = 1 }
 ar  = Category.find_or_create_by!(name: "ActiveRecordクエリ") { |c| c.position = 2 }
 cfg = Category.find_or_create_by!(name: "Gemfile・設定コマンド") { |c| c.position = 3 }
