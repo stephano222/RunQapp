@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: rundaappkai  # ← あなたのアプリ名に変更
+    env: ruby
+    buildCommand: "./bin/render-build.sh"
+    startCommand: "bundle exec puma -C config/puma.rb"
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: macminidb  # ← あなたのデータベース名に変更
+          property: connectionString
+      - key: RAILS_MASTER_KEY
+        sync: false
+
+databases:
+  - name: macminidb  # ← あなたのデータベース名に変更
+    databaseName: your_database_name
+    user: your_database_user
