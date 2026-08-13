@@ -1,18 +1,18 @@
 
 services:
   db:
-    image: mysql:5.7
-    platform: linux/amd64
+    image: postgres:16
     environment:
       TZ: Asia/Tokyo
-      MYSQL_ROOT_PASSWORD: password
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
     volumes:
-      - mysql_data:/var/lib/mysql
+      - postgres_data:/var/lib/postgresql/data
     ports:
-      - 3308:3306
+      - 5433:5432
   web:
     build: .
-    command: bash -c "bundle check || bundle install; npm install; npm run build; rm -f tmp/pids/server.pid && bundle exec rails s -p 3000 -b '0.0.0.0'"
+    command: bash -c "bundle check || bundle install; yarn install; yarn build; bundle exec rails dartsass:build; rm -f tmp/pids/server.pid && bundle exec rails s -p 3000 -b '0.0.0.0'"
     tty: true
     stdin_open: true
     volumes:
@@ -36,6 +36,6 @@ services:
     ports:
       - 4445:4444
 volumes:
-  mysql_data:
+  postgres_data:
   bundle_data:
   node_modules:

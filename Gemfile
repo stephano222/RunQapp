@@ -9,8 +9,8 @@ gem "rails", "~> 7.0.3", ">= 7.0.3.1"
 # The original asset pipeline for Rails [https://github.com/rails/sprockets-rails]
 gem "sprockets-rails"
 
-# Use mysql as the database for Active Record
-
+# Use PostgreSQL as the database for Active Record
+gem "pg", "~> 1.1"
 
 # Use the Puma web server [https://github.com/puma/puma]
 gem "puma", "~> 5.0"
@@ -63,11 +63,6 @@ group :development, :test do
   gem "rubocop-checkstyle_formatter"
   gem "rspec-rails"
   gem "rspec_junit_formatter"
-  gem "mysql2", "~> 0.5"
-end
-# 本番環境ではPostgreSQL
-group :production do
-  gem 'pg'
 end
 
 group :development do
