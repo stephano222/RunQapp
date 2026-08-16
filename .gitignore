@@ -35,3 +35,4 @@ yarn-debug.log*
 !.env.example
 
 *.rbc
+package-lock.json
