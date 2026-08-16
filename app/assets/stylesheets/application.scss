@@ -13,61 +13,10 @@ body {
   width: 100%;
   height: 100%;
   z-index: -1;
-
-  .critter-anim {
-    transform-box: fill-box;
-    transform-origin: center;
-    animation: critter-bob 2.8s ease-in-out infinite;
-  }
-
-  .critter-anim-a { animation-duration: 3.2s; animation-delay: 0.2s; }
-  .critter-anim-b { animation-duration: 3.6s; animation-delay: 0.6s; }
-  .critter-anim-c { animation-duration: 2.6s; animation-delay: 0s; }
-
-  .eye {
-    transform-box: fill-box;
-    transform-origin: center;
-    animation: critter-blink 4.5s ease-in-out infinite;
-  }
-
-  .paw {
-    transform-box: fill-box;
-    transform-origin: center;
-    animation: paw-type 0.5s ease-in-out infinite;
-  }
-
-  .paw-right {
-    animation-delay: 0.25s;
-  }
-
-  .code-line {
-    transform-box: fill-box;
-    transform-origin: left center;
-    animation: code-flicker 2.4s ease-in-out infinite;
-  }
-
-  .code-line-2 { animation-delay: 0.3s; }
-  .code-line-3 { animation-delay: 0.6s; }
-}
-
-@keyframes critter-bob {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
-}
-
-@keyframes critter-blink {
-  0%, 92%, 100% { transform: scaleY(1); }
-  95% { transform: scaleY(0.1); }
-}
-
-@keyframes paw-type {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(3px); }
-}
-
-@keyframes code-flicker {
-  0%, 100% { opacity: 0.9; }
-  50% { opacity: 0.35; }
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
 }
 
 .navbar.bg-dark {
@@ -77,7 +26,7 @@ body {
 
 
 main.container {
-  background-color: rgba(255, 255, 255, 0.82);
+  background-color: rgba(255, 255, 255, 0.94);
   border-radius: 1rem;
   padding: 1.5rem;
   box-shadow: 0 4px 24px rgba(60, 90, 60, 0.12);
