@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: rundaappkai
+    name: runqapp
     env: ruby
     buildCommand: "./bin/render-build.sh"
     startCommand: "bundle exec puma -C config/puma.rb"
