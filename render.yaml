@@ -17,6 +17,9 @@ services:
         value: "true"
       - key: RAILS_LOG_TO_STDOUT
         value: "true"
+      # 無料プラン(512MB)ではワーカー1つのほうが起動が速くメモリも安定する
+      - key: WEB_CONCURRENCY
+        value: "1"
 
 databases:
   - name: rundaappkai-db

@@ -24,6 +24,11 @@ Rails.application.configure do
   # Apache or NGINX already handles this.
   config.public_file_server.enabled = ENV["RAILS_SERVE_STATIC_FILES"].present?
 
+  # ダイジェスト付きアセットは内容が変われば名前も変わるので、長期キャッシュさせる
+  config.public_file_server.headers = {
+    "Cache-Control" => "public, max-age=#{1.year.to_i}, immutable"
+  }
+
   # Compress CSS using a preprocessor.
   # config.assets.css_compressor = :sass
 
