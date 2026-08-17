@@ -2,34 +2,36 @@
 
 <h1 class="h4 mb-3">和訳結果</h1>
 
-<% if @translator.role %>
-  <div class="card mb-4 border-primary">
-    <div class="card-body">
-      <div class="translation-label mb-2">このコードの役割</div>
-      <p class="mb-0"><%= @translator.role %></p>
-    </div>
-  </div>
-<% end %>
-
-<div class="card mb-4">
+<%# 1. 全体的なコードの意味。役割・要約・通し訳をひとまとめにする %>
+<div class="card mb-4 border-primary">
   <div class="card-body">
-    <div class="translation-label mb-2">全体の意味(要約)</div>
-    <p class="mb-0"><%= @translator.summary %></p>
+    <h2 class="h6 card-title mb-3">全体的なコードの意味</h2>
+
+    <% if @translator.role %>
+      <div class="translation-summary mb-3">
+        <div class="translation-label">役割</div>
+        <p class="mb-0"><%= @translator.role %></p>
+      </div>
+    <% end %>
+
+    <div class="mb-3">
+      <div class="translation-label">ひとことで言うと</div>
+      <p class="mb-0"><%= @translator.summary %></p>
+    </div>
+
+    <% if @translator.prose %>
+      <div>
+        <div class="translation-label">通して読むと</div>
+        <p class="mb-0"><%= @translator.prose %></p>
+      </div>
+    <% end %>
   </div>
 </div>
 
-<% if @translator.prose %>
-  <div class="card mb-4">
-    <div class="card-body">
-      <div class="translation-label mb-2">全体の意味(通し訳)</div>
-      <p class="mb-0"><%= @translator.prose %></p>
-    </div>
-  </div>
-<% end %>
-
+<%# 2. 各1文のコード的意味。行ごとの訳と、そこに出てくる英単語 %>
 <div class="card mb-4">
   <div class="card-body">
-    <div class="translation-label mb-3">1行ごとの意味</div>
+    <h2 class="h6 card-title mb-3">各1文のコード的意味</h2>
 
     <% @translator.line_translations.each do |number, raw, meaning| %>
       <div class="translation-line">
@@ -42,24 +44,24 @@
         <% end %>
       </div>
     <% end %>
+
+    <% if @translator.words.any? %>
+      <div class="mt-4">
+        <div class="translation-label mb-2">
+          この中で使われている英単語(<%= @translator.words.size %>語)
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+          <% @translator.words.each do |word, meaning| %>
+            <span class="translation-word">
+              <strong><%= word %></strong>
+              <span class="text-muted"><%= meaning %></span>
+            </span>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
   </div>
 </div>
-
-<% if @translator.words.any? %>
-  <div class="card mb-4">
-    <div class="card-body">
-      <div class="translation-label mb-3">出てくる英単語(<%= @translator.words.size %>語)</div>
-      <div class="d-flex flex-wrap gap-2">
-        <% @translator.words.each do |word, meaning| %>
-          <span class="translation-word">
-            <strong><%= word %></strong>
-            <span class="text-muted"><%= meaning %></span>
-          </span>
-        <% end %>
-      </div>
-    </div>
-  </div>
-<% end %>
 
 <div class="alert alert-secondary small">
   この和訳は辞書とパターンによる自動解析です。判断できない行はその旨を表示しています。
