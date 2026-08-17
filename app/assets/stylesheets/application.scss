@@ -70,44 +70,50 @@ main.container {
 
 .acorn-stage {
   position: relative;
-  height: 220px;
+  height: 260px;
   border-radius: 0.75rem;
-  background: linear-gradient(180deg, #dff2d8 0%, #c3e6bb 100%);
+  background: linear-gradient(180deg, #cfe8ff 0%, #dff2d8 65%, #bfe0b6 100%);
   border: 1px solid #a9d6a0;
   overflow: hidden;
-  touch-action: manipulation;
+  cursor: crosshair;
+  touch-action: none;
 }
 
-.acorn-item {
+.shooter-player {
   position: absolute;
-  font-size: 2rem;
+  bottom: 4px;
+  font-size: 1.9rem;
   line-height: 1;
-  background: transparent;
-  border: none;
-  padding: 0.15rem;
-  cursor: pointer;
-  animation: acorn-pop 0.18s ease-out;
+  width: 34px;
+  text-align: center;
+  transition: left 0.05s linear;
 }
 
-.acorn-got {
-  animation: acorn-take 0.15s ease-out forwards;
+.shooter-bullet {
+  position: absolute;
+  font-size: 1rem;
+  line-height: 1;
+  pointer-events: none;
 }
 
-.acorn-bad {
-  animation: acorn-shake 0.15s ease-out forwards;
+.shooter-enemy {
+  position: absolute;
+  font-size: 1.6rem;
+  line-height: 1;
+  pointer-events: none;
 }
 
-@keyframes acorn-pop {
-  from { transform: scale(0.4); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
+.shooter-burst {
+  position: absolute;
+  font-size: 1.4rem;
+  line-height: 1;
+  pointer-events: none;
+  animation: shooter-burst 0.3s ease-out forwards;
 }
 
-@keyframes acorn-take {
-  to { transform: scale(1.7) translateY(-14px); opacity: 0; }
-}
-
-@keyframes acorn-shake {
-  to { transform: scale(0.5) rotate(25deg); opacity: 0; }
+@keyframes shooter-burst {
+  from { transform: scale(0.6); opacity: 1; }
+  to { transform: scale(1.9); opacity: 0; }
 }
 
 .typing-display {
