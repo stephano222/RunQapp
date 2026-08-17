@@ -25,6 +25,8 @@ auth    = upsert_category("認証・セキュリティ", 7)
 spec    = upsert_category("テスト(RSpec)", 8)
 cfg     = upsert_category("コマンド・設定", 9)
 html    = upsert_category("HTML", 10)
+setup   = upsert_category("番外編: 環境構築", 11)
+deploy  = upsert_category("番外編: デプロイ", 12)
 
 Snippet.official.destroy_all
 
@@ -877,6 +879,265 @@ CODE
   thead(見出し部分)と tbody(データ部分)で分けると構造が明確になる。
 
   【注意】表はデータを見せるためのもの。レイアウト目的で使ってはいけない。
+EXP
+
+# ============================================================
+# 番外編: 環境構築
+# ============================================================
+
+seed_snippet(setup, "アプリを新規作成する", <<~CODE, <<~EXP)
+  rails new myapp --database=postgresql
+  cd myapp
+  rails db:create
+CODE
+  Railsアプリを一から作るときの最初の3手。
+
+  【重要】`--database` は後から変えると手間がかかるので、最初に決める。
+    postgresql → 本番運用の定番。Render・Heroku等がそのまま対応している
+    mysql      → 既存システムとの連携が必要な場合
+    sqlite3    → 指定しない場合のデフォルト。手軽だが本番には向かない
+
+  【注意】既存フォルダに作る場合は `rails new .` とする。
+  その際 Gemfile などを上書きするか聞かれるので、必要なファイルは退避しておく。
+EXP
+
+seed_snippet(setup, "Dockerfile(開発環境の土台)", <<~CODE, <<~EXP)
+  FROM ruby:3.2.3
+
+  WORKDIR /myapp
+
+  COPY Gemfile* ./
+  RUN bundle install
+
+  COPY . .
+
+  CMD ["rails", "server", "-b", "0.0.0.0"]
+CODE
+  同じ開発環境をチーム全員・本番で再現するための設計図。
+
+  【重要】Gemfileだけ先にCOPYしてからbundle installする理由。
+  Dockerは行ごとに結果をキャッシュする。先に全ファイルをコピーすると、
+  コードを1文字直しただけで bundle install がやり直しになる。
+  Gemfileを先に置けば、gemを変えない限りインストールは再利用される。
+
+  【注意】`-b "0.0.0.0"` は必須。これが無いとコンテナの外から接続できない。
+EXP
+
+seed_snippet(setup, "compose.yml(複数コンテナの連携)", <<~CODE, <<~EXP)
+  services:
+    db:
+      image: postgres:16
+      environment:
+        POSTGRES_PASSWORD: password
+      volumes:
+        - postgres_data:/var/lib/postgresql/data
+    web:
+      build: .
+      ports:
+        - "3000:3000"
+      depends_on:
+        - db
+
+  volumes:
+    postgres_data:
+CODE
+  アプリ用とDB用のコンテナをまとめて起動する設定。
+
+  【重要】volumes の指定が最も大事。
+  コンテナは削除すると中のデータも消える。volumesで外部に保存領域を作っておけば、
+  コンテナを作り直してもDBの中身は残る。これが無いと再起動のたびに全データが消える。
+
+  【重要】ports は「パソコン側:コンテナ側」の順。
+  `"3001:3000"` ならブラウザでは localhost:3001 でアクセスする。
+EXP
+
+seed_snippet(setup, "database.yml(DB接続設定)", <<~CODE, <<~EXP)
+  default: &default
+    adapter: postgresql
+    encoding: unicode
+    username: <%= ENV.fetch("DATABASE_USERNAME") { "postgres" } %>
+    password: <%= ENV.fetch("DATABASE_PASSWORD") { "password" } %>
+    host: <%= ENV.fetch("DATABASE_HOST") { "db" } %>
+CODE
+  アプリがどのデータベースに繋ぐかを決めるファイル。
+
+  【重要】host には「db」のようなサービス名を書く。
+  Docker Composeでは、compose.ymlに書いたサービス名がそのままホスト名になる。
+  localhost と書くと「自分自身のコンテナ」を指してしまい接続できない。
+
+  【重要】パスワードは直書きせず ENV.fetch で環境変数から読む。
+  第2引数は環境変数が無いときの初期値。これで開発と本番の設定を1つのファイルで両立できる。
+EXP
+
+seed_snippet(setup, "コンテナの起動とDB準備", <<~CODE, <<~EXP)
+  docker compose build
+  docker compose up -d
+  docker compose exec web bundle exec rails db:create db:migrate db:seed
+CODE
+  環境構築後、アプリが動くまでの一連の流れ。
+
+  【重要】それぞれの役割。
+    build → Dockerfileからイメージ(環境の型)を作る
+    up -d → コンテナを起動(-d はバックグラウンド実行)
+    exec  → 起動中のコンテナの中でコマンドを実行
+
+  DB関連のコマンドはコンテナの中で動かす必要があるため `exec web` を付ける。
+  【注意】Gemfileを変更したら build からやり直さないと反映されない。
+EXP
+
+seed_snippet(setup, "困ったときの確認コマンド", <<~CODE, <<~EXP)
+  docker compose ps
+  docker compose logs web --tail 50
+  docker compose down
+CODE
+  コンテナが起動しない・アプリが表示されないときの調査手順。
+
+  【重要】使う順番。
+    ps    → コンテナが起動しているか確認(Up か Exited か)
+    logs  → エラーメッセージを読む。原因はほぼここに書いてある
+    down  → 全コンテナを停止して削除(やり直したいとき)
+
+  【注意】`down -v` はvolumesも削除するのでDBのデータが全部消える。
+  普段は -v を付けない。付けるのは「最初から作り直したい」と決めたときだけ。
+EXP
+
+seed_snippet(setup, "ポート衝突の対処", <<~CODE, <<~EXP)
+  lsof -i :3000
+  docker ps
+CODE
+  「port is already allocated」エラーが出たときの調べ方。
+
+  【重要】原因は「別のアプリが同じポートを使っている」こと。
+  Railsは3000番、PostgreSQLは5432番を使うため、
+  複数のプロジェクトを同時に動かすとぶつかりやすい。
+
+  解決策は2つ。
+    ・使っている方を止める(docker compose down)
+    ・compose.yml のポートをずらす("3001:3000" のように左側を変える)
+
+  変えるのは左側(パソコン側)だけ。右側を変えるとアプリに繋がらなくなる。
+EXP
+
+# ============================================================
+# 番外編: デプロイ
+# ============================================================
+
+seed_snippet(deploy, "本番で必要な環境変数", <<~CODE, <<~EXP)
+  RAILS_ENV=production
+  RAILS_MASTER_KEY=xxxxxxxx
+  RAILS_SERVE_STATIC_FILES=true
+  DATABASE_URL=postgresql://user:pass@host/dbname
+CODE
+  デプロイ先(Render等)の管理画面で設定する値。1つでも欠けると動かない。
+
+  【重要】それぞれの役割。
+    RAILS_MASTER_KEY         → config/master.key の中身。暗号化された設定を復号する鍵
+    RAILS_SERVE_STATIC_FILES → CSSや画像をRails自身が配信する指定。無いと画面が真っ白になる
+    DATABASE_URL             → 接続先DB。これがあれば database.yml の設定より優先される
+
+  【注意】master.key は絶対にGitにコミットしない(.gitignoreに入っている)。
+  漏れると暗号化した情報が全て読まれてしまう。管理画面から手入力で登録する。
+EXP
+
+seed_snippet(deploy, "アセットのプリコンパイル", <<~CODE, <<~EXP)
+  bundle exec rails assets:precompile
+CODE
+  CSSやJavaScriptを本番用にまとめる処理。デプロイで最もつまずくポイント。
+
+  【重要】これを忘れると起動後に必ずエラーになる。
+    ActionView::Template::Error
+    The asset "application.css" is not present in the asset pipeline
+
+  開発環境ではアクセスのたびに自動で組み立ててくれるが、
+  本番は速度のため事前に1回だけ作る方式に変わる。だから明示的な実行が必要。
+
+  【注意】ビルド時にDBへ繋がないので、ダミーの DATABASE_URL と
+  SECRET_KEY_BASE を渡さないと失敗することがある。
+EXP
+
+seed_snippet(deploy, "ビルドスクリプト", <<~CODE, <<~EXP)
+  #!/usr/bin/env bash
+  set -o errexit
+
+  bundle install
+  yarn install
+  bundle exec rails assets:precompile
+  bundle exec rails db:migrate
+CODE
+  デプロイ時に実行される手順をまとめたファイル(bin/render-build.sh など)。
+
+  【重要】1行目の set -o errexit を必ず書く。
+  これが無いと途中でエラーが起きても最後まで実行され、
+  「ビルドは成功したのにアプリが壊れている」という分かりにくい状態になる。
+
+  【注意】ファイルに実行権限が必要。付け忘れると Permission denied で失敗する。
+    chmod +x bin/render-build.sh
+    git update-index --chmod=+x bin/render-build.sh
+EXP
+
+seed_snippet(deploy, "本番のマイグレーション", <<~CODE, <<~EXP)
+  bundle exec rails db:migrate
+CODE
+  本番DBにテーブルを作る・変更する処理。デプロイのたびに実行する。
+
+  【重要】忘れると次のエラーが出る。
+    PG::UndefinedTable: ERROR: relation "users" does not exist
+
+  「テーブルが存在しない」という意味。マイグレーションが一度も
+  実行されていない状態を示す典型的なメッセージ。
+
+  【注意】本番では db:reset や db:drop を絶対に実行しない。全ユーザーのデータが消える。
+  やり直したいときも、必ず新しいマイグレーションを追加する形で対応する。
+EXP
+
+seed_snippet(deploy, "デプロイ設定はどこが使われるか", <<~CODE, <<~EXP)
+  # Dockerタイプ  → Dockerfile の内容が使われる
+  # ネイティブ環境 → buildCommand の内容が使われる
+CODE
+  同じサービスでも、作成時に選んだタイプで読まれる設定ファイルが変わる。
+
+  【重要】ここを取り違えると、直しても直しても反映されない。
+  ビルドログの最初の数行で見分けられる。
+
+    load build definition from Dockerfile   → Dockerタイプ
+    Running build command './bin/...'       → ネイティブ環境
+
+  Dockerタイプの場合、buildCommandや管理画面のビルド設定は完全に無視される。
+  必要な処理はDockerfileの中に書く必要がある。
+EXP
+
+seed_snippet(deploy, "ログの読み分け", <<~CODE, <<~EXP)
+  # Build log   … なぜ壊れたか(原因)
+  # Runtime log … 何が壊れたか(症状)
+CODE
+  デプロイで問題が起きたとき、見るべきログは2種類ある。
+
+  【重要】症状だけ見て推測すると遠回りになる。
+    Runtime log の「application.css が無い」は症状。
+    Build log を見ると「そもそもCSSを作る処理が走っていない」と原因が分かる。
+
+  見分け方は先頭の行。
+    Cloning from ... で始まる → Build log
+    Started GET "/" がある     → Runtime log
+
+  まず症状を掴み、次に必ずBuild logで原因を確かめる、という順番が近道。
+EXP
+
+seed_snippet(deploy, "無料プランのスリープ", <<~CODE, <<~EXP)
+  # 15分アクセスが無いとサーバーが停止する
+  # 次のアクセス時に起動し直すため50秒ほどかかる
+CODE
+  無料プランで「表示が異常に遅い」と感じたときの主な原因。
+
+  【重要】これはコードの最適化では解決できない。
+  起動後は0.3秒で表示されるのに初回だけ遅い場合、ほぼこれが原因。
+
+  対処は2つ。
+    ・有料プランにする(スリープしなくなる)
+    ・外部サービスから定期的にアクセスして起こし続ける
+
+  【注意】画像やCSSの軽量化は別問題として有効。
+  2.7MBの画像を545KBに圧縮するだけで、起動後の表示は確実に速くなる。
 EXP
 
 # カテゴリ名を再編したことで空になった旧カテゴリを片付ける。
