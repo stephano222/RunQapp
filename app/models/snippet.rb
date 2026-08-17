@@ -9,6 +9,11 @@ class Snippet < ApplicationRecord
   scope :official, -> { where(user_id: nil) }
   scope :custom, -> { where.not(user_id: nil) }
 
+  # 見せてよい範囲。最初から入っている公式のコードは全員に見せるが、
+  # 各自が追加したコードは本人にだけ見せる。
+  # 一覧・カテゴリ・練習画面のいずれもこの範囲を通す。
+  scope :visible_to, ->(user) { where(user_id: [nil, user&.id]) }
+
   def official?
     user_id.nil?
   end
@@ -37,16 +42,21 @@ class Snippet < ApplicationRecord
   # 一覧画面と同じ並び(カテゴリの順 → コードのid順)で、次に練習するコードを返す。
   # 同じカテゴリを打ち終えたら次のカテゴリの先頭へ進む。
   # 最後のコードまで来たら nil を返し、呼び出し側で終わりを知らせる。
-  def next_in_course
-    category.snippets.where("id > ?", id).order(:id).first || first_of_following_category
+  #
+  # 一覧に出ないコードへ飛ばしてしまわないよう、見える範囲だけをたどる。
+  def next_in_course(user)
+    scope = Snippet.visible_to(user)
+
+    scope.where(category_id: category_id).where("snippets.id > ?", id).order(:id).first ||
+      first_of_following_category(scope)
   end
 
   private
 
   # カテゴリ自体の並びは position、同じ position なら id で決まる。
   # 一覧の表示順と食い違わないよう、ここでも同じ条件で次を探す。
-  def first_of_following_category
-    Snippet
+  def first_of_following_category(scope)
+    scope
       .joins(:category)
       .where(
         "categories.position > :position OR (categories.position = :position AND categories.id > :id)",

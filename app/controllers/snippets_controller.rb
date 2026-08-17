@@ -6,7 +6,10 @@ class SnippetsController < ApplicationController
   LEVELS = %w[easy normal hard].freeze
 
   def index
-    @categories = Category.includes(:snippets)
+    @categories = Category.all
+    # カテゴリごとに分けて渡す。ビューから category.snippets を辿ると
+    # 他の人が追加したコードまで含まれてしまうため。
+    @snippets_by_category = Snippet.visible_to(current_user).order(:id).group_by(&:category_id)
     @snippet = Snippet.new
   end
 
@@ -48,7 +51,7 @@ class SnippetsController < ApplicationController
   def practice
     @level = LEVELS.include?(params[:level]) ? params[:level] : "easy"
     # 一覧に戻らずに次の課題へ進めるようにする
-    @next_snippet = @snippet.next_in_course
+    @next_snippet = @snippet.next_in_course(current_user)
   end
 
   # 練習画面から、メモだけを更新する
@@ -62,8 +65,11 @@ class SnippetsController < ApplicationController
 
   private
 
+  # 他の人が追加したコードは、URLを直接叩かれても開かせない。
   def set_snippet
-    @snippet = Snippet.find(params[:id])
+    @snippet = Snippet.visible_to(current_user).find(params[:id])
+  rescue ActiveRecord::RecordNotFound
+    redirect_to snippets_path, alert: "そのコードは見つかりません"
   end
 
   def require_owner
