@@ -10,6 +10,8 @@ class SnippetsController < ApplicationController
     # カテゴリごとに分けて渡す。ビューから category.snippets を辿ると
     # 他の人が追加したコードまで含まれてしまうため。
     @snippets_by_category = Snippet.visible_to(current_user).order(:id).group_by(&:category_id)
+    # 一覧の各行に自己ベストを出すため、まとめて1回で引く
+    @best_accuracy_by_snippet = current_user.attempts.group(:snippet_id).maximum(:accuracy)
     @snippet = Snippet.new
   end
 

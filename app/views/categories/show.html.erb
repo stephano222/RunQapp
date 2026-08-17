@@ -3,25 +3,6 @@
 
 <div class="list-group">
   <% @snippets.each do |snippet| %>
-    <div class="list-group-item">
-      <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
-        <div>
-          <h2 class="h6 mb-1"><%= link_to snippet.title, snippet_path(snippet) %></h2>
-          <% best = @best_accuracy_by_snippet[snippet.id] %>
-          <% if best %>
-            <span class="badge <%= best >= Attempt::REVIEW_THRESHOLD ? 'bg-success' : 'bg-danger' %>">
-              自己ベスト <%= number_with_precision(best, precision: 0) %>%
-            </span>
-          <% else %>
-            <span class="badge bg-secondary">未挑戦</span>
-          <% end %>
-        </div>
-        <div class="btn-group btn-group-sm" role="group">
-          <%= link_to "優しい", practice_snippet_path(snippet, level: "easy"), class: "btn btn-outline-success" %>
-          <%= link_to "普通", practice_snippet_path(snippet, level: "normal"), class: "btn btn-outline-warning" %>
-          <%= link_to "難しい", practice_snippet_path(snippet, level: "hard"), class: "btn btn-outline-danger" %>
-        </div>
-      </div>
-    </div>
+    <%= render "snippets/row", snippet: snippet, best: @best_accuracy_by_snippet[snippet.id] %>
   <% end %>
 </div>
