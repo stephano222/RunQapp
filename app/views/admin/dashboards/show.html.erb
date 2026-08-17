@@ -1,0 +1,148 @@
+<h1 class="h4 mb-4">利用状況</h1>
+
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-3">
+    <div class="card text-center h-100">
+      <div class="card-body">
+        <div class="display-6"><%= @user_count %></div>
+        <div class="text-muted small">登録ユーザー</div>
+        <div class="small text-success">今週 +<%= @new_users_this_week %></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-6 col-md-3">
+    <div class="card text-center h-100">
+      <div class="card-body">
+        <div class="display-6"><%= @total_sign_ins %></div>
+        <div class="text-muted small">のべログイン回数</div>
+        <div class="small text-muted"><%= @signed_in_users %>人が利用</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-6 col-md-3">
+    <div class="card text-center h-100">
+      <div class="card-body">
+        <div class="display-6"><%= @attempt_count %></div>
+        <div class="text-muted small">練習回数</div>
+        <div class="small text-success">今週 +<%= @attempts_this_week %></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-6 col-md-3">
+    <div class="card text-center h-100">
+      <div class="card-body">
+        <div class="display-6"><%= @average_accuracy || "—" %><%= "%" if @average_accuracy %></div>
+        <div class="text-muted small">平均正答率</div>
+        <div class="small text-muted">コード<%= @snippet_count %>件</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-12 col-lg-6">
+    <div class="card h-100">
+      <div class="card-body">
+        <h2 class="h6 card-title mb-3">よく練習されているコード</h2>
+        <% if @popular_snippets.any? %>
+          <ol class="mb-0 ps-3">
+            <% @popular_snippets.each do |(_id, title), count| %>
+              <li class="mb-1">
+                <%= title %>
+                <span class="text-muted small">(<%= count %>回)</span>
+              </li>
+            <% end %>
+          </ol>
+        <% else %>
+          <p class="text-muted mb-0">まだ練習履歴がありません。</p>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-lg-6">
+    <div class="card h-100">
+      <div class="card-body">
+        <h2 class="h6 card-title mb-3">つまずかれやすいコード</h2>
+        <% if @difficult_snippets.any? %>
+          <ol class="mb-0 ps-3">
+            <% @difficult_snippets.each do |(_id, title), accuracy| %>
+              <li class="mb-1">
+                <%= title %>
+                <span class="text-danger small">
+                  (平均<%= accuracy.round(1) %>%)
+                </span>
+              </li>
+            <% end %>
+          </ol>
+        <% else %>
+          <p class="text-muted mb-0">3回以上挑戦されたコードがまだありません。</p>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card mb-4">
+  <div class="card-body">
+    <h2 class="h6 card-title mb-3">レベル別の練習回数</h2>
+    <% if @attempts_by_level.any? %>
+      <div class="d-flex gap-3 flex-wrap">
+        <% { "easy" => "優しい", "normal" => "普通", "hard" => "難しい" }.each do |key, label| %>
+          <div>
+            <span class="text-muted small"><%= label %></span>
+            <strong class="ms-1"><%= @attempts_by_level[key] || 0 %>回</strong>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <p class="text-muted mb-0">まだ練習履歴がありません。</p>
+    <% end %>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <h2 class="h6 card-title mb-3">利用者ごとの状況</h2>
+    <div class="table-responsive">
+      <table class="table table-sm align-middle mb-0">
+        <thead>
+          <tr>
+            <th>利用者</th>
+            <th>ログイン回数</th>
+            <th>練習回数</th>
+            <th>最終ログイン</th>
+            <th>登録日</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @recent_users.each do |user| %>
+            <tr>
+              <td>
+                <%= user.name %>
+                <% if user.admin? %>
+                  <span class="badge bg-secondary">管理者</span>
+                <% end %>
+              </td>
+              <td><%= user.sign_in_count %>回</td>
+              <td><%= user.attempts.count %>回</td>
+              <td class="small text-muted">
+                <%= user.last_sign_in_at&.strftime("%Y/%m/%d %H:%M") || "未ログイン" %>
+              </td>
+              <td class="small text-muted">
+                <%= user.created_at.strftime("%Y/%m/%d") %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<p class="small text-muted mt-3 mb-0">
+  個々の入力内容は記録・表示していません。件数と平均のみを扱っています。
+</p>

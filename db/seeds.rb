@@ -7,6 +7,10 @@ test_user.name = "テストユーザー"
 test_user.password = "test1234"
 test_user.save!
 
+# 利用状況を確認できるよう管理者にしておく。
+# 検証を通さず列だけ更新するので、パスワードには影響しない。
+test_user.update_columns(admin: true) unless test_user.admin?
+
 # 既存カテゴリでも並び順を確実に反映させるため find_or_create_by! ではなく明示的に更新する
 def upsert_category(name, position)
   category = Category.find_or_initialize_by(name: name)

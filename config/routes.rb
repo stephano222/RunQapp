@@ -27,4 +27,9 @@ Rails.application.routes.draw do
   # 和訳モード。貼り付けたコードを解析して日本語にする。
   get  "translate", to: "translations#new"
   post "translate", to: "translations#show"
+
+  # 管理者だけが見られる利用状況の画面
+  namespace :admin do
+    resource :dashboard, only: [:show]
+  end
 end

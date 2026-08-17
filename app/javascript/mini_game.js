@@ -183,17 +183,18 @@ const BAT_PITCHES = 10
 
 // 球速は5段階。球ごとにランダムで選び、どれが来るか分からないようにする。
 // 名前を表示することで、速かったのか遅かったのかが分かるようにしている。
+// 距離を詰めた分、速すぎると反応できないため全体を少し抑えている
 const BAT_SPEEDS = [
-  { label: "ゆるい球", speed: 110 },
-  { label: "ふつうの球", speed: 150 },
-  { label: "速い球", speed: 200 },
-  { label: "かなり速い球", speed: 260 },
-  { label: "剛速球", speed: 330 }
+  { label: "ゆるい球", speed: 80 },
+  { label: "ふつうの球", speed: 110 },
+  { label: "速い球", speed: 145 },
+  { label: "かなり速い球", speed: 185 },
+  { label: "剛速球", speed: 230 }
 ]
 
 // 球を出す位置(画面幅に対する割合)。
-// 右端から飛ばすと待ち時間が長いので、手前から出してテンポよくする。
-const BAT_START_RATIO = 0.62
+// 打つ位置(左端付近)にかなり近いところから出し、待ち時間をほぼ無くす。
+const BAT_START_RATIO = 0.4
 
 class BattingGame {
   static title = "⚾ どんぐりバッティング"
