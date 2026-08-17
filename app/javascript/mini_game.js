@@ -181,9 +181,23 @@ class ShootingGame {
 
 const BAT_PITCHES = 10
 
+// 球速は5段階。球ごとにランダムで選び、どれが来るか分からないようにする。
+// 名前を表示することで、速かったのか遅かったのかが分かるようにしている。
+const BAT_SPEEDS = [
+  { label: "ゆるい球", speed: 110 },
+  { label: "ふつうの球", speed: 150 },
+  { label: "速い球", speed: 200 },
+  { label: "かなり速い球", speed: 260 },
+  { label: "剛速球", speed: 330 }
+]
+
+// 球を出す位置(画面幅に対する割合)。
+// 右端から飛ばすと待ち時間が長いので、手前から出してテンポよくする。
+const BAT_START_RATIO = 0.62
+
 class BattingGame {
   static title = "⚾ どんぐりバッティング"
-  static hint = "飛んでくるどんぐりが白い線に重なったら画面をタップして打ちます。"
+  static hint = "飛んでくるどんぐりが白い線に重なったらタップ。球速は5段階でランダムに変わります。"
   static bestKey = "gameBestBatting"
 
   constructor(ui) {
@@ -222,8 +236,9 @@ class BattingGame {
   }
 
   updateLabels() {
+    const speed = this.currentSpeedLabel ? ` ${this.currentSpeedLabel}` : ""
     this.ui.statLeft.innerHTML = `スコア: <strong>${this.score}点</strong>`
-    this.ui.statRight.innerHTML = `${this.pitch} / ${BAT_PITCHES}球`
+    this.ui.statRight.innerHTML = `${this.pitch} / ${BAT_PITCHES}球${speed}`
   }
 
   nextPitch() {
@@ -239,11 +254,18 @@ class BattingGame {
     el.textContent = "🌰"
     this.ui.stage.appendChild(el)
 
-    // 球ごとに速さを変えてタイミングを取りづらくする
-    const speed = 170 + Math.random() * 160
-    this.ball = { el, x: rect.width - 20, y: rect.height * 0.45, speed, hit: false }
+    // 5段階の中から球速をひとつ選ぶ。どれが来るかは分からない。
+    const kind = BAT_SPEEDS[Math.floor(Math.random() * BAT_SPEEDS.length)]
+    this.currentSpeedLabel = kind.label
+
+    // 打者の手前から出すことで、待ち時間を短くする
+    const startX = rect.width * BAT_START_RATIO
+
+    this.ball = { el, x: startX, y: rect.height * 0.45, speed: kind.speed, hit: false }
     el.style.left = `${this.ball.x}px`
     el.style.top = `${this.ball.y}px`
+
+    this.updateLabels()
 
     this.lastFrame = performance.now()
     this.loop()
