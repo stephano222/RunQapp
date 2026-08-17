@@ -41,6 +41,19 @@ def seed_snippet(category, title, code, explanation, language = "ruby")
   )
 end
 
+# 和訳をあとから流し込む。タイトルで対象を探すので、
+# コード本体の定義と和訳を分けて書ける。
+def translate(title, summary: nil, lines: nil, words: nil)
+  snippet = Snippet.official.find_by(title: title)
+  return warn("和訳の対象が見つかりません: #{title}") unless snippet
+
+  snippet.update!(
+    summary: summary&.strip,
+    line_notes: lines&.strip,
+    glossary: words&.strip
+  )
+end
+
 # ============================================================
 # ルーティング
 # ============================================================
@@ -1139,6 +1152,725 @@ CODE
   【注意】画像やCSSの軽量化は別問題として有効。
   2.7MBの画像を545KBに圧縮するだけで、起動後の表示は確実に速くなる。
 EXP
+
+# ============================================================
+# 和訳(全体の言い換え / 1行ごとの意味 / 英単語の意味)
+# ============================================================
+
+translate("resources(7つのルートを一括生成)",
+  summary: "Postに対して、一覧・詳細・新規作成・編集・削除などの経路をまとめて用意する。",
+  lines: <<~LINES,
+    resources :posts : postsに関する7つの経路を一括で作る
+  LINES
+  words: <<~WORDS)
+    resources : 資源。ひとまとまりの操作対象のこと
+    posts : 投稿(複数形)
+  WORDS
+
+translate("ルートパス(トップページ)",
+  summary: "「/」にアクセスされたら、Posts担当のindex(一覧)を表示する。",
+  lines: <<~LINES,
+    root "posts#index" : トップページをpostsの一覧画面にする
+  LINES
+  words: <<~WORDS)
+    root : 根。ここではサイトの入口(トップページ)
+    index : 索引・一覧
+  WORDS
+
+translate("member と collection",
+  summary: "7つの基本経路に加えて、特定1件用のpreviewと、一覧用のsearchを追加する。",
+  lines: <<~LINES,
+    resources :posts do : postsの経路を作りつつ、中で追加の指定をする
+    member do : 特定の1件に対する操作をここに書く
+    get :preview : /posts/1/preview を表示用に追加する
+    collection do : 一覧全体に対する操作をここに書く
+    get :search : /posts/search を表示用に追加する
+  LINES
+  words: <<~WORDS)
+    member : 構成員。ここでは個別の1件
+    collection : 集まり。ここでは全体の一覧
+    preview : 下見・試し表示
+    search : 検索
+    get : 取得する(ページを見るときの通信方法)
+  WORDS
+
+translate("ネストしたルーティング",
+  summary: "投稿に属するコメントとして、作成と削除の経路だけを用意する。",
+  lines: <<~LINES,
+    resources :posts do : postsの経路の中に
+    resources :comments, only: [:create, :destroy] : commentsの作成と削除だけを入れ子で作る
+  LINES
+  words: <<~WORDS)
+    comments : コメント(複数形)
+    only : 〜だけ
+    create : 作成する
+    destroy : 破棄する・削除する
+  WORDS
+
+translate("namespace(管理画面などの区分け)",
+  summary: "管理者用として、URLもファイルもadminで区切ったusersの経路を作る。",
+  lines: <<~LINES,
+    namespace :admin do : adminという区画を作り
+    resources :users : その中にusersの経路を用意する
+  LINES
+  words: <<~WORDS)
+    namespace : 名前空間。名前が衝突しないよう区切った領域
+    admin : 管理者(administrator の略)
+    users : 利用者(複数形)
+  WORDS
+
+translate("基本のCRUDアクション",
+  summary: "送られてきた値で投稿を新規作成し、保存できたら詳細画面へ移動、失敗したら入力画面を再表示する。",
+  lines: <<~LINES,
+    def create : createという処理を定義する
+    @post = Post.new(post_params) : 受け取った値でPostを新しく用意する
+    if @post.save : 保存に成功したら
+    redirect_to @post, notice: "作成しました" : 詳細画面へ移動し、メッセージを出す
+    else : 失敗したら
+    render :new, status: :unprocessable_entity : 入力画面を再表示する
+  LINES
+  words: <<~WORDS)
+    def : define の略。処理を定義する
+    new : 新しく作る
+    save : 保存する
+    redirect_to : 別の場所へ転送する
+    notice : お知らせ
+    render : 描画する・表示する
+    status : 状態。ここでは通信結果の番号
+    unprocessable_entity : 処理できない内容(422番)
+  WORDS
+
+translate("ストロングパラメータ",
+  summary: "送信された値のうち、postのtitleとbodyだけを受け取ってよいものとする。",
+  lines: <<~LINES,
+    private : ここから下は外部から直接呼べない処理
+    def post_params : post_paramsという処理を定義する
+    params.require(:post).permit(:title, :body) : postの中のtitleとbodyだけ許可する
+  LINES
+  words: <<~WORDS)
+    private : 非公開
+    params : parameters の略。送られてきた値
+    require : 必要とする・要求する
+    permit : 許可する
+    title : 表題
+    body : 本文
+  WORDS
+
+translate("before_action(共通処理をまとめる)",
+  summary: "show・edit・updateを実行する前に、URLのidで投稿を1件取り出しておく。",
+  lines: <<~LINES,
+    before_action :set_post, only: [:show, :edit, :update] : 指定の3つの処理の前にset_postを実行する
+    private : ここから下は外部から直接呼べない処理
+    def set_post : set_postという処理を定義する
+    @post = Post.find(params[:id]) : URLのidで投稿を1件取り出す
+  LINES
+  words: <<~WORDS)
+    before : 前に
+    action : 行動・処理
+    only : 〜だけ
+    show : 表示する
+    edit : 編集する
+    update : 更新する
+    find : 見つける
+    id : 識別番号
+  WORDS
+
+translate("flash メッセージ",
+  summary: "一覧画面へ移動しながら、成功や失敗を伝える短いメッセージを一度だけ表示する。",
+  lines: <<~LINES,
+    redirect_to posts_path, notice: "保存しました" : 一覧へ移動し、成功の知らせを出す
+    redirect_to posts_path, alert: "権限がありません" : 一覧へ移動し、警告を出す
+  LINES
+  words: <<~WORDS)
+    flash : 閃光。一瞬だけ出るメッセージ
+    notice : お知らせ(良い報告)
+    alert : 警告
+    path : 経路。ここではURL
+  WORDS
+
+translate("params の受け取り方",
+  summary: "URLやフォームから送られてきた値を、名前を指定して取り出す。",
+  lines: <<~LINES,
+    params[:id] : URLの中のidを取り出す
+    params[:post][:title] : フォームのpostの中のtitleを取り出す
+    params[:q] : URLの?q=... の値を取り出す
+  LINES
+  words: <<~WORDS)
+    params : parameters の略。送られてきた値の入れ物
+    q : query の略。検索語によく使う名前
+  WORDS
+
+translate("バリデーション(入力チェック)",
+  summary: "タイトルは必須で100文字まで、メールは重複禁止、価格は0以上であることを保存前に確かめる。",
+  lines: <<~LINES,
+    validates :title, presence: true, length: { maximum: 100 } : タイトルは必須、100文字以内
+    validates :email, uniqueness: true : メールは他と重複しないこと
+    validates :price, numericality: { greater_than_or_equal_to: 0 } : 価格は0以上の数値であること
+  LINES
+  words: <<~WORDS)
+    validates : 検証する・妥当性を確かめる
+    presence : 存在すること
+    length : 長さ
+    maximum : 最大
+    uniqueness : 一意であること(重複しない)
+    numericality : 数値であること
+    greater_than_or_equal_to : 〜以上
+  WORDS
+
+translate("アソシエーション(1対多)",
+  summary: "1人のユーザーは複数の投稿を持ち、投稿は必ず1人のユーザーに属する。ユーザーを消すと投稿も消える。",
+  lines: <<~LINES,
+    has_many :posts, dependent: :destroy : 複数の投稿を持ち、自分が消えたら一緒に消す
+    belongs_to :user : この投稿は1人のユーザーに属する
+  LINES
+  words: <<~WORDS)
+    has_many : 多数を持つ
+    belongs_to : 〜に属する
+    dependent : 依存した
+    destroy : 破棄する
+  WORDS
+
+translate("scope(よく使う条件に名前を付ける)",
+  summary: "「公開済みだけ」「新しい順」という条件に名前を付けて、何度でも呼び出せるようにする。",
+  lines: <<~LINES,
+    scope :published, -> { where(published: true) } : publishedという名前で「公開済みだけ」を定義する
+    scope :recent, -> { order(created_at: :desc) } : recentという名前で「新しい順」を定義する
+  LINES
+  words: <<~WORDS)
+    scope : 範囲。ここでは絞り込み条件の名前
+    published : 公開された
+    where : 〜という条件で
+    order : 並べる
+    recent : 最近の
+    desc : descending の略。降順(大きい順)
+  WORDS
+
+translate("コールバック(保存の前後に処理)",
+  summary: "保存する直前にメールアドレスを小文字に統一し、検証の前に初期状態を設定する。",
+  lines: <<~LINES,
+    before_save { self.email = email.downcase } : 保存の前にメールを小文字に直す
+    before_validation :set_default_status : 検証の前に初期状態を決める処理を呼ぶ
+  LINES
+  words: <<~WORDS)
+    callback : 呼び戻し。決まった場面で自動的に呼ばれる処理
+    before_save : 保存の前に
+    downcase : 小文字にする
+    validation : 検証
+    default : 初期値・既定
+    status : 状態
+  WORDS
+
+translate("enum(状態を数値で管理)",
+  summary: "下書き・公開・保管という状態を、DBには0,1,2として保存しつつ名前で扱えるようにする。",
+  lines: <<~LINES,
+    enum status: { draft: 0, published: 1, archived: 2 } : 状態に名前と数値を対応させる
+  LINES
+  words: <<~WORDS)
+    enum : enumeration の略。列挙(選択肢の一覧)
+    draft : 下書き
+    published : 公開済み
+    archived : 保管済み
+  WORDS
+
+translate("where / find_by / find",
+  summary: "条件に合う複数件、条件に合う1件、IDで1件と、取り出し方を使い分ける。",
+  lines: <<~LINES,
+    User.where(active: true) : 有効なユーザーを全件取り出す
+    User.find_by(email: "a@example.com") : そのメールのユーザーを1件取り出す
+    User.find(1) : IDが1のユーザーを取り出す
+  LINES
+  words: <<~WORDS)
+    where : 〜という条件で
+    find_by : 〜によって見つける
+    find : 見つける
+    active : 有効な・活動中の
+  WORDS
+
+translate("includes(N+1問題の解決)",
+  summary: "投稿を取り出すときに、書いた人の情報もまとめて先に読み込んでおく。",
+  lines: <<~LINES,
+    posts = Post.includes(:user) : 投稿と、その書き手をまとめて読み込む
+    posts.each { |post| puts post.user.name } : 1件ずつ取り出し、書き手の名前を表示する
+  LINES
+  words: <<~WORDS)
+    includes : 含める・一緒に読み込む
+    each : それぞれ
+    puts : 出力する(put string の略)
+    name : 名前
+  WORDS
+
+translate("order / limit / offset",
+  summary: "投稿を新しい順に並べて、先頭の10件だけ取り出す。",
+  lines: <<~LINES,
+    Post.order(created_at: :desc).limit(10) : 作成日の新しい順に並べ、10件までにする
+  LINES
+  words: <<~WORDS)
+    order : 並べる・順序
+    created_at : 作られた日時
+    desc : 降順(新しい順・大きい順)
+    asc : 昇順(古い順・小さい順)
+    limit : 制限・上限
+    offset : ずらす量(何件目から取るか)
+  WORDS
+
+translate("update と destroy",
+  summary: "投稿のタイトルを新しい値に書き換える。または投稿そのものを削除する。",
+  lines: <<~LINES,
+    post.update(title: "新しいタイトル") : タイトルを書き換えて保存する
+    post.destroy : この投稿を削除する
+  LINES
+  words: <<~WORDS)
+    update : 更新する
+    destroy : 破棄する・削除する
+  WORDS
+
+translate("pluck(特定カラムだけ取得)",
+  summary: "全ユーザーのメールアドレスだけを、配列としてまとめて取り出す。",
+  lines: <<~LINES,
+    User.pluck(:email) : メールアドレスだけを一覧で取り出す
+    User.where(active: true).pluck(:id, :name) : 有効なユーザーのIDと名前だけ取り出す
+  LINES
+  words: <<~WORDS)
+    pluck : 摘み取る。必要なものだけ抜き出す
+    email : メールアドレス
+  WORDS
+
+translate("exists? と count",
+  summary: "そのメールのユーザーがいるかを確かめる。公開済みの投稿が何件あるかを数える。",
+  lines: <<~LINES,
+    User.exists?(email: "a@example.com") : そのメールの利用者がいるか調べる
+    Post.where(published: true).count : 公開済みの投稿の件数を数える
+  LINES
+  words: <<~WORDS)
+    exists? : 存在するか?
+    count : 数える・件数
+  WORDS
+
+translate("joins(テーブルの結合)",
+  summary: "投稿とその書き手を結び付け、書き手が有効な投稿だけに絞り込む。",
+  lines: <<~LINES,
+    Post.joins(:user).where(users: { active: true }) : 書き手と結合し、有効な人の投稿だけにする
+  LINES
+  words: <<~WORDS)
+    joins : 結合する・つなぐ
+    users : 利用者テーブル(結合時は複数形で書く)
+    active : 有効な
+  WORDS
+
+translate("テーブルの作成",
+  summary: "投稿を保存する表を作り、題名・本文・書き手・作成日時の欄を用意する。",
+  lines: <<~LINES,
+    create_table :posts do |t| : postsという表を作る
+    t.string :title, null: false : 短い文字列の題名欄。空は不可
+    t.text :body : 長い文章の本文欄
+    t.references :user, foreign_key: true : 書き手への参照(user_id)を作る
+    t.timestamps : 作成日時と更新日時を自動で用意する
+  LINES
+  words: <<~WORDS)
+    create_table : 表を作る
+    string : 短い文字列
+    text : 長い文章
+    references : 参照。他の表とのつながり
+    foreign_key : 外部キー。他の表を指す印
+    timestamps : 日時の記録
+    null : 空・値なし
+  WORDS
+
+translate("カラムの追加と削除",
+  summary: "投稿の表に公開状態の欄を初期値falseで足す。使わなくなった欄を取り除く。",
+  lines: <<~LINES,
+    add_column :posts, :published, :boolean, default: false : 公開状態の欄を足す。初期値は非公開
+    remove_column :posts, :old_field, :string : 不要になった欄を取り除く
+  LINES
+  words: <<~WORDS)
+    add_column : 列(欄)を追加する
+    remove_column : 列を取り除く
+    boolean : 真偽値(はい・いいえ)
+    default : 初期値
+  WORDS
+
+translate("インデックスの追加",
+  summary: "利用者の表のメールアドレスに索引を付け、同時に重複も禁止する。",
+  lines: <<~LINES,
+    add_index :users, :email, unique: true : メール欄に索引を付け、重複を禁止する
+  LINES
+  words: <<~WORDS)
+    index : 索引。探しやすくする仕組み
+    unique : 唯一の。重複しない
+  WORDS
+
+translate("マイグレーションの実行と取り消し",
+  summary: "未実行の変更をDBに反映する。直前の変更を取り消す。実行状況を確認する。",
+  lines: <<~LINES,
+    rails db:migrate : 未実行の変更をDBに反映する
+    rails db:rollback : 直前の変更を取り消す
+    rails db:migrate:status : どれが実行済みか一覧で見る
+  LINES
+  words: <<~WORDS)
+    migrate : 移行する。DBの構造を変更する
+    rollback : 巻き戻す
+    status : 状態
+  WORDS
+
+translate("form_with(フォームの基本)",
+  summary: "投稿用の入力欄を作り、題名を書いて保存ボタンで送信できるようにする。",
+  lines: <<~LINES,
+    form_with model: @post do |f| : @postを対象にした入力欄を作る
+    f.text_field :title : 題名を書く1行の入力欄
+    f.submit "保存する" : 送信ボタン
+  LINES
+  words: <<~WORDS)
+    form : 用紙・入力欄
+    with : 〜を使って
+    model : 型。ここでは対象のデータ
+    text_field : 文字の入力欄
+    submit : 送信する
+  WORDS
+
+translate("link_to(リンクの生成)",
+  summary: "投稿の詳細ページへのリンクを作る。削除用のリンクは削除の通信方法を指定する。",
+  lines: <<~LINES,
+    link_to "詳細", post_path(post) : その投稿の詳細ページへのリンクを作る
+    link_to "削除", post_path(post), data: { turbo_method: :delete } : 削除として送るリンクを作る
+  LINES
+  words: <<~WORDS)
+    link : つながり・リンク
+    to : 〜へ
+    path : 経路・URL
+    method : 方法。ここでは通信の種類
+    delete : 削除する
+  WORDS
+
+translate("部分テンプレート(render partial)",
+  summary: "共通の入力欄を呼び出す。または投稿の件数分だけ同じ見た目を繰り返し描く。",
+  lines: <<~LINES,
+    render "form", post: @post : _form.html.erb を呼び出し、@postを渡す
+    render partial: "post", collection: @posts : 投稿の件数分だけ _post.html.erb を描く
+  LINES
+  words: <<~WORDS)
+    render : 描画する・表示する
+    partial : 部分的な。切り出した部品
+    collection : 集まり・一覧
+  WORDS
+
+translate("条件分岐と繰り返し(ERB)",
+  summary: "投稿が1件でもあれば、1件ずつ取り出して題名を表示する。",
+  lines: <<~LINES,
+    <% if @posts.any? %> : 投稿が1件でもあれば
+    <% @posts.each do |post| %> : 1件ずつ取り出して
+    <p><%= post.title %></p> : 題名を画面に出す
+  LINES
+  words: <<~WORDS)
+    if : もし〜なら
+    any? : 1つでもあるか?
+    each : それぞれ
+    do : 〜する(まとまりの始まり)
+    end : 終わり
+  WORDS
+
+translate("よく使うヘルパー",
+  summary: "数値を3桁区切りにする。日時を日本語の形式にする。長い文章を短く切る。",
+  lines: <<~LINES,
+    number_with_delimiter(1234567) : 1,234,567 のように3桁ごとに区切る
+    l Time.current, format: :short : 今の日時を短い日本語表記にする
+    truncate(post.body, length: 100) : 本文を100文字で切って「...」を付ける
+  LINES
+  words: <<~WORDS)
+    number : 数値
+    delimiter : 区切り記号
+    l : localize の略。地域の表記に直す
+    format : 書式
+    truncate : 切り詰める
+    length : 長さ
+  WORDS
+
+translate("has_secure_password",
+  summary: "パスワードを安全に扱う仕組みを、この1行で組み込む。",
+  lines: <<~LINES,
+    has_secure_password : 復元できない形に変換して保存する仕組みを組み込む
+  LINES
+  words: <<~WORDS)
+    secure : 安全な
+    password : 合言葉
+    digest : 要約。元に戻せない形に変換した値
+  WORDS
+
+translate("セッション(ログイン状態の保持)",
+  summary: "ログインした人のIDを預かる。ログアウト時はそれを空にする。",
+  lines: <<~LINES,
+    session[:user_id] = user.id : ログインした人のIDを預ける
+    session[:user_id] = nil : 預けたIDを消す(ログアウト)
+  LINES
+  words: <<~WORDS)
+    session : 一続きの利用時間。ここでは接続状態の記憶
+    nil : 何もない状態
+  WORDS
+
+translate("ログイン必須にする",
+  summary: "処理の前にログイン状態を調べ、していなければログイン画面へ送り返す。",
+  lines: <<~LINES,
+    before_action :require_login : すべての処理の前にログイン確認を行う
+    def require_login : ログイン確認の処理を定義する
+    return if current_user : ログイン済みなら何もせず戻る
+    redirect_to login_path, alert: "ログインしてください" : 未ログインならログイン画面へ送る
+  LINES
+  words: <<~WORDS)
+    require : 必要とする
+    login : ログイン・接続開始
+    return : 戻る
+    current : 現在の
+    alert : 警告
+  WORDS
+
+translate("本人だけが操作できるようにする",
+  summary: "ログイン中の人が持つ投稿の中から探すことで、他人の投稿には触れないようにする。",
+  lines: <<~LINES,
+    @post = current_user.posts.find(params[:id]) : 自分の投稿の中からidで1件探す
+  LINES
+  words: <<~WORDS)
+    current_user : 今ログインしている人
+    posts : その人が持つ投稿
+    find : 見つける
+  WORDS
+
+translate("テストの基本構造",
+  summary: "Userについて「名前が無ければ無効」という決まりを、実際に確かめる。",
+  lines: <<~LINES,
+    RSpec.describe User, type: :model do : Userのモデルについて調べる
+    it "名前が無ければ無効" do : この1つの決まりを確かめる
+    user = User.new(name: nil) : 名前が空のUserを用意して
+    expect(user).to be_invalid : 無効になることを期待する
+  LINES
+  words: <<~WORDS)
+    describe : 記述する・説明する
+    it : それ(1つの検証項目)
+    expect : 期待する
+    to : 〜であること
+    be_invalid : 無効であれ
+    model : 型・データの定義
+  WORDS
+
+translate("よく使うマッチャ",
+  summary: "値が一致するか、有効か、処理の前後で件数が増えたかを確かめる。",
+  lines: <<~LINES,
+    expect(user.name).to eq "太郎" : 名前が「太郎」と等しいことを期待する
+    expect(user).to be_valid : 有効であることを期待する
+    expect { user.save }.to change(User, :count).by(1) : 保存でUserが1件増えることを期待する
+  LINES
+  words: <<~WORDS)
+    matcher : 照合するもの。期待する状態の書き方
+    eq : equal の略。等しい
+    be_valid : 有効であれ
+    change : 変化する
+    by : 〜の分だけ
+    count : 件数
+  WORDS
+
+translate("let と before",
+  summary: "テストで使うユーザーを用意し、各テストの前にログインさせておく。",
+  lines: <<~LINES,
+    let(:user) { User.create!(name: "太郎") } : 必要になったときにUserを用意する
+    before do : 各テストの前に
+    login_as(user) : そのユーザーでログインしておく
+  LINES
+  words: <<~WORDS)
+    let : 〜とする(名前を付けて用意する)
+    before : 前に
+    as : 〜として
+  WORDS
+
+translate("リクエストスペック",
+  summary: "投稿一覧のURLへ実際にアクセスし、正常に表示されることを確かめる。",
+  lines: <<~LINES,
+    it "一覧が表示される" do : この動作を確かめる
+    get posts_path : 投稿一覧のURLにアクセスする
+    expect(response).to have_http_status(:ok) : 正常(200)が返ることを期待する
+  LINES
+  words: <<~WORDS)
+    request : 要求。ページを見に行くこと
+    spec : specification の略。仕様・検証
+    response : 応答。返ってきた結果
+    status : 状態
+    ok : 正常(200番)
+  WORDS
+
+translate("generate(ファイルの自動生成)",
+  summary: "モデル・コントローラ・マイグレーションの雛形を自動で作る。",
+  lines: <<~LINES,
+    rails g model Post title:string body:text : Postモデルと表の定義を作る
+    rails g controller Posts index show : Postsのコントローラと2つの画面を作る
+    rails g migration AddPublishedToPosts published:boolean : 公開状態の欄を足す変更を作る
+  LINES
+  words: <<~WORDS)
+    generate : 生成する(g と略せる)
+    model : 型・データの定義
+    controller : 制御するもの。橋渡し役
+    migration : 移行。DB構造の変更
+    add : 加える
+  WORDS
+
+translate("データベース関連コマンド",
+  summary: "DBそのものを作り、表を作り、初期データを流し込む。",
+  lines: <<~LINES,
+    rails db:create : データベース自体を作る
+    rails db:migrate : 表を作る・変更する
+    rails db:seed : 初期データを流し込む
+  LINES
+  words: <<~WORDS)
+    db : database の略
+    create : 作る
+    migrate : 移行する
+    seed : 種。ここでは初期データ
+  WORDS
+
+translate("確認・デバッグ用コマンド",
+  summary: "経路の一覧を見る。対話画面でデータを触る。開発用のサーバーを立ち上げる。",
+  lines: <<~LINES,
+    rails routes : 定義済みの経路を一覧で見る
+    rails console : 対話画面でデータを直接触る
+    rails server : 開発用のサーバーを起動する
+  LINES
+  words: <<~WORDS)
+    routes : 経路
+    console : 操作卓。対話式の画面
+    server : 給仕するもの。要求に応えるプログラム
+    debug : 虫取り。不具合を調べること
+  WORDS
+
+translate("Gemの追加",
+  summary: "使いたい部品をGemfileに書き、取り込みを実行する。",
+  lines: <<~LINES,
+    gem "kaminari" : 使いたい部品の名前を書く
+    bundle install : 書いた部品をまとめて取り込む
+  LINES
+  words: <<~WORDS)
+    gem : 宝石。Rubyの部品(ライブラリ)
+    bundle : 束ねる
+    install : 導入する
+  WORDS
+
+translate("HTMLの基本構造",
+  summary: "HTML5の文書として、日本語・文字コード・題名を宣言し、本文の入れ物を用意する。",
+  lines: <<~LINES,
+    <!DOCTYPE html> : HTML5で書くという宣言
+    <html lang="ja"> : 日本語のページだと伝える
+    <meta charset="UTF-8"> : 文字コードを指定する(文字化け防止)
+    <title>ページタイトル</title> : タブに出る題名
+    <body> : 画面に表示される中身をここに書く
+  LINES
+  words: <<~WORDS)
+    doctype : 文書型
+    lang : language の略。言語
+    meta : 付随する情報
+    charset : character set の略。文字の集合
+    head : 頭。表示されない情報の置き場
+    body : 体。表示される中身
+  WORDS
+
+translate("見出しと段落",
+  summary: "大見出し・中見出し・段落として、文章の構造を示す。",
+  lines: <<~LINES,
+    <h1>大見出し</h1> : ページで最も大きな見出し
+    <h2>中見出し</h2> : その下の階層の見出し
+    <p>これは段落のテキストです。</p> : ひとまとまりの文章
+  LINES
+  words: <<~WORDS)
+    h : heading の略。見出し
+    p : paragraph の略。段落
+  WORDS
+
+translate("リンクと画像",
+  summary: "他のページへの入口を作る。画像を表示し、読めない場合の説明も添える。",
+  lines: <<~LINES,
+    <a href="https://example.com">リンクテキスト</a> : その住所へ移動する入口を作る
+    <img src="/images/photo.jpg" alt="写真の説明"> : 画像を表示し、代わりの説明も持たせる
+  LINES
+  words: <<~WORDS)
+    a : anchor の略。錨。リンクの印
+    href : hypertext reference の略。参照先
+    img : image の略。画像
+    src : source の略。元の場所
+    alt : alternative の略。代わりの説明
+  WORDS
+
+translate("リスト",
+  summary: "順序に意味のない項目を、箇条書きとして並べる。",
+  lines: <<~LINES,
+    <ul> : 順序なしの箇条書きを始める
+    <li>箇条書きの項目</li> : その中の1項目
+  LINES
+  words: <<~WORDS)
+    ul : unordered list の略。順序なしの一覧
+    ol : ordered list の略。順序ありの一覧
+    li : list item の略。一覧の項目
+  WORDS
+
+translate("フォーム",
+  summary: "題名を入力して/postsへ送信できる入力欄を作る。",
+  lines: <<~LINES,
+    <form action="/posts" method="post"> : /postsへ送る入力欄を始める
+    <label for="title">タイトル</label> : 入力欄の名札
+    <input type="text" id="title" name="title"> : 文字を書く欄。nameが送信時の鍵になる
+    <button type="submit">送信</button> : 送信ボタン
+  LINES
+  words: <<~WORDS)
+    form : 用紙・入力欄
+    action : 動作。ここでは送り先
+    method : 方法。通信の種類
+    label : 名札
+    input : 入力
+    name : 名前。送信時の鍵になる
+    submit : 送信する
+  WORDS
+
+translate("input の種類",
+  summary: "メール・パスワード・数値と、入力の種類を指定して適切な扱いにする。",
+  lines: <<~LINES,
+    <input type="email" name="email" required> : メール形式を確認する必須の欄
+    <input type="password" name="password"> : 入力が隠される欄
+    <input type="number" name="age" min="0"> : 0以上の数値を入れる欄
+  LINES
+  words: <<~WORDS)
+    type : 種類
+    email : メールアドレス
+    password : 合言葉
+    number : 数値
+    required : 必須の
+    min : minimum の略。最小
+  WORDS
+
+translate("div と span",
+  summary: "意味を持たない箱として、まとまりを作る。divは縦に積まれ、spanは文中に収まる。",
+  lines: <<~LINES,
+    <div class="card"> : 改行を伴う箱を作る
+    <span class="badge">新着</span> : 文章の途中に置ける小さな箱
+  LINES
+  words: <<~WORDS)
+    div : division の略。区分・区画
+    span : 範囲・わたり
+    class : 分類。見た目を指定する名前
+    badge : 記章・目印
+  WORDS
+
+translate("テーブル(表)",
+  summary: "名前と年齢を持つ表を、見出し部分とデータ部分に分けて作る。",
+  lines: <<~LINES,
+    <table> : 表を始める
+    <thead> : 見出し部分
+    <tr><th>名前</th><th>年齢</th></tr> : 見出しの1行
+    <tbody> : データ部分
+    <tr><td>太郎</td><td>20</td></tr> : データの1行
+  LINES
+  words: <<~WORDS)
+    table : 表
+    thead : table head の略。表の頭
+    tbody : table body の略。表の胴体
+    tr : table row の略。表の行
+    th : table header の略。見出しのマス
+    td : table data の略。データのマス
+  WORDS
+
+puts "和訳: #{Snippet.official.where.not(summary: nil).count}件"
 
 # カテゴリ名を再編したことで空になった旧カテゴリを片付ける。
 # ユーザーが追加したコードが1件でも残っているカテゴリは削除しない。

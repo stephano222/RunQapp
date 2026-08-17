@@ -18,6 +18,8 @@
 
 <pre class="typing-display mb-3"><%= @snippet.code %></pre>
 
+<%= render "snippets/translation", snippet: @snippet %>
+
 <% if @snippet.explanation.present? %>
   <div class="card mb-4">
     <div class="card-body">

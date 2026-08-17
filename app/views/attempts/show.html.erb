@@ -29,6 +29,8 @@
 <h2 class="h6">採点結果</h2>
 <pre class="typing-display mb-4"><% @diff.each do |d| %><span class="char <%= d[:match] ? 'char-correct' : 'char-incorrect' %>"><%= d[:expected] || d[:typed] %></span><% end %></pre>
 
+<%= render "snippets/translation", snippet: @snippet %>
+
 <% if @snippet.explanation.present? %>
   <div class="card mb-4">
     <div class="card-body">

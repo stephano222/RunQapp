@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2026_08_12_000004) do
+ActiveRecord::Schema[7.0].define(version: 2026_08_17_000001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -45,6 +45,9 @@ ActiveRecord::Schema[7.0].define(version: 2026_08_12_000004) do
     t.string "language", default: "ruby", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.text "line_notes"
+    t.text "summary"
+    t.text "glossary"
     t.index ["category_id"], name: "index_snippets_on_category_id"
     t.index ["user_id"], name: "index_snippets_on_user_id"
   end

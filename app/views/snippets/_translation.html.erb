@@ -1,0 +1,40 @@
+<% if snippet.translated? %>
+  <div class="card mb-4">
+    <div class="card-body">
+      <h2 class="h6 card-title mb-3">和訳</h2>
+
+      <% if snippet.summary.present? %>
+        <div class="translation-summary mb-3">
+          <div class="translation-label">このコードがしていること</div>
+          <p class="mb-0"><%= snippet.summary %></p>
+        </div>
+      <% end %>
+
+      <% if snippet.line_notes_pairs.any? %>
+        <div class="mb-3">
+          <div class="translation-label mb-2">1行ごとの意味</div>
+          <% snippet.line_notes_pairs.each do |code_part, meaning| %>
+            <div class="translation-line">
+              <code class="translation-code"><%= code_part %></code>
+              <span class="translation-meaning"><%= meaning %></span>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+
+      <% if snippet.glossary_pairs.any? %>
+        <div>
+          <div class="translation-label mb-2">出てくる英単語</div>
+          <div class="d-flex flex-wrap gap-2">
+            <% snippet.glossary_pairs.each do |word, meaning| %>
+              <span class="translation-word">
+                <strong><%= word %></strong>
+                <span class="text-muted"><%= meaning %></span>
+              </span>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+<% end %>
