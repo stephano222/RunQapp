@@ -2,9 +2,9 @@
 # 既存の公式コード(user_idがnil)だけを入れ替える。ユーザーが追加したコードは消さない。
 
 # 誰でも試せるテストユーザー(ログイン画面に初めから入力されている)
-test_user = User.find_or_initialize_by(email: "test@example.com")
+test_user = User.find_or_initialize_by(email: User::DEMO_EMAIL)
 test_user.name = "テストユーザー"
-test_user.password = "test1234"
+test_user.password = User::DEMO_PASSWORD
 test_user.save!
 
 # このアカウントはログイン画面にパスワードが表示されており誰でも入れる。

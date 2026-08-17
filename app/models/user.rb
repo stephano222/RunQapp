@@ -1,6 +1,15 @@
 class User < ApplicationRecord
   has_secure_password
 
+  # 誰でも試せるお試し用アカウント。ログイン画面に入力済みで表示する。
+  # 隠す前提のものではないので、ここに書いてシードと画面で共用する。
+  #
+  # パスワードは流出一覧に載っていない文字列にしておく。
+  # test1234 のようなありふれたものだと、ブラウザが流出を検知して
+  # ログインのたびに「パスワードを変更してください」と警告を出す。
+  DEMO_EMAIL = "test@example.com".freeze
+  DEMO_PASSWORD = "runq-mori-taiken".freeze
+
   has_many :snippets, dependent: :nullify
   has_many :attempts, dependent: :destroy
 
