@@ -1,6 +1,9 @@
 Rails.application.routes.draw do
   root "home#index"
 
+  # 死活監視用。外部サービスから定期的に叩いてスリープを防ぐ用途にも使う。
+  get "health", to: "health#show"
+
   get "signup", to: "users#new"
   post "signup", to: "users#create"
   get "login", to: "sessions#new"
