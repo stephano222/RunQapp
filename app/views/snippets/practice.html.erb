@@ -16,7 +16,10 @@
       </span>
     </div>
     <div class="d-flex gap-2 flex-wrap align-items-center">
-      <button type="button" id="reveal-toggle" class="btn btn-sm btn-outline-primary"></button>
+      <%# 優しいレベルは常にお手本が出ているので、切り替えボタンは表示しない %>
+      <% unless @level == "easy" %>
+        <button type="button" id="reveal-toggle" class="btn btn-sm btn-outline-primary"></button>
+      <% end %>
       <select id="sound-theme" class="form-select form-select-sm w-auto" aria-label="効果音の種類"></select>
       <button type="button" id="sound-toggle" class="btn btn-sm btn-outline-secondary"></button>
       <button type="button" id="reset-button" class="btn btn-sm btn-outline-secondary">やり直す</button>

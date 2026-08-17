@@ -343,7 +343,10 @@ class TypingApp {
       const enabled = this.sound.toggle()
       this.updateSoundToggleLabel(enabled)
     })
-    this.revealToggle.addEventListener("click", () => this.toggleReveal())
+    // 優しいレベルではボタン自体を置いていないので存在確認してから繋ぐ
+    if (this.revealToggle) {
+      this.revealToggle.addEventListener("click", () => this.toggleReveal())
+    }
     if (this.themeSelect) {
       this.themeSelect.addEventListener("change", (event) => {
         this.sound.setTheme(event.target.value)
@@ -371,6 +374,7 @@ class TypingApp {
   }
 
   updateRevealToggleLabel() {
+    if (!this.revealToggle) return
     this.revealToggle.textContent = this.revealed ? "👁 お手本を隠す" : "👁 お手本を見る"
     this.revealToggle.classList.toggle("active", this.revealed)
   }
