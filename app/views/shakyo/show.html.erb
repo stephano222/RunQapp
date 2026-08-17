@@ -1,0 +1,38 @@
+<script type="application/json" id="shakyo-data"><%= raw({ code: @code }.to_json.gsub("</", "<\\/")) %></script>
+
+<p><%= link_to "← 別のコードを写経する", shakyo_path %></p>
+
+<div id="shakyo-app">
+  <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+    <h1 class="h5 mb-0"><%= @title %></h1>
+    <div class="d-flex gap-2 flex-wrap align-items-center">
+      <span class="small text-muted" id="shakyo-progress"></span>
+      <button type="button" id="shakyo-reset" class="btn btn-sm btn-outline-secondary">最初から</button>
+    </div>
+  </div>
+
+  <div class="progress mb-3" style="height: 6px;">
+    <div id="shakyo-bar" class="progress-bar bg-success" role="progressbar" style="width: 0%;"></div>
+  </div>
+
+  <%# お手本。写し終えた行は薄くなり、今写している行が強調される %>
+  <pre id="shakyo-source" class="typing-display mb-3"></pre>
+
+  <div class="mb-2 small text-muted">
+    今この行を写しています(Enterで次の行へ)
+  </div>
+  <textarea
+    id="shakyo-input"
+    class="form-control typing-input"
+    rows="3"
+    autocomplete="off"
+    autocapitalize="off"
+    autocorrect="off"
+    spellcheck="false"
+    placeholder="ここに写してください"
+  ></textarea>
+
+  <div id="shakyo-done" class="alert alert-success mt-3 d-none">
+    最後まで写経できました。おつかれさまでした。
+  </div>
+</div>

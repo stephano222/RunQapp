@@ -1,7 +1,7 @@
 class SnippetsController < ApplicationController
   before_action :require_login
-  before_action :set_snippet, only: [:show, :edit, :update, :destroy, :practice]
-  before_action :require_owner, only: [:edit, :update, :destroy]
+  before_action :set_snippet, only: [:show, :edit, :update, :destroy, :practice, :memo]
+  before_action :require_owner, only: [:edit, :update, :destroy, :memo]
 
   LEVELS = %w[easy normal hard].freeze
 
@@ -49,6 +49,15 @@ class SnippetsController < ApplicationController
     @level = LEVELS.include?(params[:level]) ? params[:level] : "easy"
   end
 
+  # 練習画面から、メモだけを更新する
+  def memo
+    if @snippet.update(memo: params[:memo])
+      render json: { ok: true }
+    else
+      render json: { ok: false }, status: :unprocessable_entity
+    end
+  end
+
   private
 
   def set_snippet
@@ -62,6 +71,6 @@ class SnippetsController < ApplicationController
   end
 
   def snippet_params
-    params.require(:snippet).permit(:category_id, :title, :code, :explanation, :language)
+    params.require(:snippet).permit(:category_id, :title, :code, :explanation, :language, :memo)
   end
 end

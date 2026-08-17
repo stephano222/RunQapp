@@ -71,3 +71,32 @@
     <p class="small text-muted mt-2">お手本は表示されません。記憶を頼りに入力してください。</p>
   <% end %>
 </div>
+
+<%# メモ欄。打ちながら気づいたことを書き留められるようにする。
+    保存済みのメモがあれば初期値として読み込む。 %>
+<div id="practice-memo" class="mt-4" data-snippet-id="<%= @snippet.id %>">
+  <div class="d-flex justify-content-between align-items-center mb-2">
+    <label for="memo-text" class="form-label mb-0">メモ</label>
+    <span class="small text-muted" id="memo-status"></span>
+  </div>
+
+  <textarea
+    id="memo-text"
+    class="form-control"
+    rows="4"
+    placeholder="間違えやすい点や、覚え方を書いておけます"
+  ><%= @snippet.memo %></textarea>
+
+  <div class="d-flex gap-2 mt-2">
+    <% if @snippet.editable_by?(current_user) %>
+      <button type="button" id="memo-save" class="btn btn-sm btn-outline-primary">保存する</button>
+    <% end %>
+    <button type="button" id="memo-clear" class="btn btn-sm btn-outline-secondary">消す</button>
+  </div>
+
+  <% unless @snippet.editable_by?(current_user) %>
+    <div class="form-text">
+      このコードは公式のものなので保存はできませんが、書いた内容はこの端末に残ります。
+    </div>
+  <% end %>
+</div>

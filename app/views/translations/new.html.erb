@@ -1,0 +1,22 @@
+<div class="row justify-content-center">
+  <div class="col-12 col-lg-9">
+    <h1 class="h3 mb-2">コード和訳</h1>
+    <p class="text-muted mb-4">
+      コードを貼り付けると、全体の意味・1行ごとの意味・出てくる英単語の意味を表示します。
+    </p>
+
+    <%= form_with url: translate_path, method: :post, local: true do |f| %>
+      <div class="mb-3">
+        <%= f.label :code, "和訳したいコード", class: "form-label" %>
+        <%= f.text_area :code,
+              class: "form-control",
+              rows: 14,
+              style: "font-family: monospace;",
+              placeholder: "ここにコードを貼り付けてください",
+              autofocus: true %>
+      </div>
+
+      <%= f.submit "和訳する", class: "btn btn-primary" %>
+    <% end %>
+  </div>
+</div>

@@ -27,6 +27,11 @@ module RunQapp
     #
     # These settings can be overridden in specific environments using the files
     # in config/environments, which are processed later.
+    # app配下は本来自動で読み込まれるが、servicesは既存アプリで
+    # 追加した階層のため明示的に指定しておく
+    config.autoload_paths << Rails.root.join("app/services")
+    config.eager_load_paths << Rails.root.join("app/services")
+
     config.time_zone = "Tokyo"
     config.i18n.default_locale = :ja
     config.i18n.available_locales = [:ja, :en]

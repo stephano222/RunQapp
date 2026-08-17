@@ -14,8 +14,17 @@ Rails.application.routes.draw do
   resources :snippets do
     member do
       get :practice
+      patch :memo
     end
   end
 
   resources :attempts, only: [:index, :show, :create]
+
+  # 写経モード。貼り付けたコードをその場で写すだけなので保存はしない。
+  get  "shakyo", to: "shakyo#new"
+  post "shakyo", to: "shakyo#show"
+
+  # 和訳モード。貼り付けたコードを解析して日本語にする。
+  get  "translate", to: "translations#new"
+  post "translate", to: "translations#show"
 end

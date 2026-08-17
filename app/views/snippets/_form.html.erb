@@ -25,5 +25,14 @@
     <%= f.label :explanation, "解説(任意)", class: "form-label" %>
     <%= f.text_area :explanation, class: "form-control", rows: 4 %>
   </div>
+
+  <div class="mb-3">
+    <%= f.label :memo, "自分用メモ(任意)", class: "form-label" %>
+    <%= f.text_area :memo,
+          class: "form-control",
+          rows: 4,
+          placeholder: "覚えにくい点、間違えやすい点、調べたことなど" %>
+    <div class="form-text">練習画面でも確認できます。</div>
+  </div>
   <%= f.submit "保存する", class: "btn btn-primary" %>
 <% end %>

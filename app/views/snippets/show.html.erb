@@ -18,6 +18,15 @@
 
 <pre class="typing-display mb-3"><%= @snippet.code %></pre>
 
+<% if @snippet.memo.present? %>
+  <div class="card mb-4 border-warning">
+    <div class="card-body">
+      <h2 class="h6 card-title">自分用メモ</h2>
+      <p class="card-text mb-0" style="white-space: pre-wrap;"><%= @snippet.memo %></p>
+    </div>
+  </div>
+<% end %>
+
 <%= render "snippets/translation", snippet: @snippet %>
 
 <% if @snippet.explanation.present? %>
