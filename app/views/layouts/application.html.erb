@@ -17,10 +17,11 @@
 
     <nav class="navbar navbar-expand-md navbar-dark bg-dark mb-4">
       <div class="container">
-        <%= link_to "RunQの森", root_path, class: "navbar-brand me-auto" %>
+        <%= link_to "RunQの森", root_path, class: "navbar-brand me-0" %>
 
-        <%# 折りたたみメニューの外に置き、スマホでも常に見えるようにする %>
-        <span id="navbar-clock" class="navbar-text navbar-clock me-2"></span>
+        <%# 折りたたみメニューの外に置き、スマホでも常に見えるようにする。
+            アプリ名とくっつかないよう ms-auto で右側へ寄せる %>
+        <span id="navbar-clock" class="navbar-text navbar-clock ms-auto me-3"></span>
 
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
           <span class="navbar-toggler-icon"></span>

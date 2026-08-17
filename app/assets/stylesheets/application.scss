@@ -44,6 +44,15 @@ main.container {
   font-size: 0.9rem;
   font-variant-numeric: tabular-nums; // 秒が変わっても幅が揺れない
   white-space: nowrap;
+  margin-left: auto; // スマホではアプリ名から離してハンバーガーの手前へ
+}
+
+// 横幅がある画面ではメニューのさらに右、ナビバーの末尾に置く
+@media (min-width: 768px) {
+  .navbar-clock {
+    order: 3;
+    margin-left: 1.25rem;
+  }
 }
 
 @media (max-width: 400px) {
@@ -127,6 +136,156 @@ main.container {
 @keyframes shooter-burst {
   from { transform: scale(0.6); opacity: 1; }
   to { transform: scale(1.9); opacity: 0; }
+}
+
+// バッティング
+.bat-zone {
+  position: absolute;
+  left: 44px;
+  width: 52px;
+  top: 0;
+  bottom: 0;
+  border-left: 2px solid rgba(255, 255, 255, 0.85);
+  border-right: 2px solid rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.18);
+  pointer-events: none;
+}
+
+.bat-batter {
+  position: absolute;
+  left: 6px;
+  top: 45%;
+  font-size: 1.9rem;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.bat-miss {
+  animation: bat-miss 0.15s ease-out;
+}
+
+@keyframes bat-miss {
+  50% { transform: rotate(-18deg); }
+}
+
+.bat-ball {
+  position: absolute;
+  font-size: 1.4rem;
+  line-height: 1;
+  pointer-events: none;
+}
+
+// 落ちもの合わせ
+.drop-board {
+  display: grid;
+  gap: 2px;
+  padding: 4px;
+  height: 100%;
+  width: 100%;
+}
+
+.drop-cell {
+  background: rgba(255, 255, 255, 0.5);
+  border: none;
+  border-radius: 4px;
+  font-size: 1.15rem;
+  line-height: 1;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.drop-cell:hover {
+  background: rgba(255, 255, 255, 0.8);
+}
+
+// もぐらたたき
+.whack-board {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  padding: 8px;
+  height: 100%;
+  width: 100%;
+}
+
+.whack-hole {
+  background: #a3805a;
+  border: none;
+  border-radius: 50% / 35%;
+  font-size: 1.7rem;
+  line-height: 1;
+  padding: 0;
+  cursor: pointer;
+  box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.whack-up {
+  background: #b8926a;
+}
+
+// スポーツ系(バスケ・サッカー・ホッケー)
+.aim-stage {
+  background: var(--aim-bg) !important;
+}
+
+.aim-field {
+  position: relative;
+  height: 100%;
+  width: 100%;
+}
+
+.aim-goal {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 3.2rem;
+  line-height: 1;
+}
+
+.aim-target-zone {
+  position: absolute;
+  top: 12px;
+  left: 42%;
+  width: 16%;
+  height: 74px;
+  border: 2px dashed rgba(0, 0, 0, 0.25);
+  border-radius: 6px;
+}
+
+.aim-flash {
+  background: rgba(255, 235, 59, 0.55);
+  border-color: rgba(0, 0, 0, 0.5);
+}
+
+.aim-bar {
+  position: absolute;
+  left: 6%;
+  right: 6%;
+  bottom: 74px;
+  height: 4px;
+  background: rgba(0, 0, 0, 0.18);
+  border-radius: 2px;
+}
+
+.aim-marker {
+  position: absolute;
+  top: -18px;
+  transform: translateX(-50%);
+  font-size: 1.8rem;
+  line-height: 1;
+}
+
+.aim-player {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 2.2rem;
+  line-height: 1;
 }
 
 .typing-display {
