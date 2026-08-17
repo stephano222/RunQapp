@@ -7,9 +7,22 @@ test_user.name = "テストユーザー"
 test_user.password = "test1234"
 test_user.save!
 
-# 利用状況を確認できるよう管理者にしておく。
-# 検証を通さず列だけ更新するので、パスワードには影響しない。
-test_user.update_columns(admin: true) unless test_user.admin?
+# このアカウントはログイン画面にパスワードが表示されており誰でも入れる。
+# 管理者権限を持たせると利用状況が全員に見えてしまうため、必ず外す。
+test_user.update_columns(admin: false) if test_user.admin?
+
+# 管理者アカウント。メールアドレスを環境変数で渡したときだけ権限を与える。
+# パスワードはこのファイルに書かず、各自が新規登録した上で指定する。
+if (admin_email = ENV["ADMIN_EMAIL"].presence)
+  admin = User.find_by(email: admin_email.downcase)
+
+  if admin
+    admin.update_columns(admin: true)
+    puts "管理者に設定しました: #{admin.email}"
+  else
+    puts "ADMIN_EMAIL に指定された #{admin_email} が見つかりません。先に新規登録してください。"
+  end
+end
 
 # 既存カテゴリでも並び順を確実に反映させるため find_or_create_by! ではなく明示的に更新する
 def upsert_category(name, position)
