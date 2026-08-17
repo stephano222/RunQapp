@@ -51,6 +51,15 @@ class Snippet < ApplicationRecord
       first_of_following_category(scope)
   end
 
+  # next_in_course の逆向き。ひとつ前のコードを返す。
+  # カテゴリの先頭にいるときは、前のカテゴリの末尾へ戻る。
+  def prev_in_course(user)
+    scope = Snippet.visible_to(user)
+
+    scope.where(category_id: category_id).where("snippets.id < ?", id).order(id: :desc).first ||
+      last_of_preceding_category(scope)
+  end
+
   private
 
   # カテゴリ自体の並びは position、同じ position なら id で決まる。
@@ -63,6 +72,18 @@ class Snippet < ApplicationRecord
         position: category.position, id: category.id
       )
       .order("categories.position ASC", "categories.id ASC", "snippets.id ASC")
+      .first
+  end
+
+  # 前のカテゴリの末尾を探す。並びの条件は次を探すときと同じで、向きだけ逆にする。
+  def last_of_preceding_category(scope)
+    scope
+      .joins(:category)
+      .where(
+        "categories.position < :position OR (categories.position = :position AND categories.id < :id)",
+        position: category.position, id: category.id
+      )
+      .order("categories.position DESC", "categories.id DESC", "snippets.id DESC")
       .first
   end
 

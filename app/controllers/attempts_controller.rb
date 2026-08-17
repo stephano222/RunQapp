@@ -16,6 +16,9 @@ class AttemptsController < ApplicationController
     @attempt = current_user.attempts.find(params[:id])
     @snippet = @attempt.snippet
     @diff = build_diff(@attempt.input_text, @snippet.code)
+    # 採点結果から、一覧に戻らずに前後の課題へ移れるようにする
+    @prev_snippet = @snippet.prev_in_course(current_user)
+    @next_snippet = @snippet.next_in_course(current_user)
   end
 
   def create
