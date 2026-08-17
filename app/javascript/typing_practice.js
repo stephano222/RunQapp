@@ -200,6 +200,7 @@ class TypingApp {
     this.statTime = root.querySelector("#stat-time")
     this.soundToggle = root.querySelector("#sound-toggle")
     this.resetButton = root.querySelector("#reset-button")
+    this.revealToggle = root.querySelector("#reveal-toggle")
 
     this.sound = new SoundKit()
     this.previousValue = ""
@@ -207,9 +208,12 @@ class TypingApp {
     this.mistakeCount = 0
     this.finished = false
     this.timerId = null
+    // 優しいレベルは最初からお手本が出ているので、押した状態から始める
+    this.revealed = this.level === "easy"
 
     this.bind()
     this.updateSoundToggleLabel()
+    this.updateRevealToggleLabel()
     this.renderTarget("")
     this.input.focus()
   }
@@ -220,6 +224,7 @@ class TypingApp {
       const enabled = this.sound.toggle()
       this.updateSoundToggleLabel(enabled)
     })
+    this.revealToggle.addEventListener("click", () => this.toggleReveal())
     this.resetButton.addEventListener("click", () => this.reset())
     this.root.addEventListener("click", (event) => {
       if (event.target.closest("button")) return
@@ -229,6 +234,18 @@ class TypingApp {
 
   updateSoundToggleLabel() {
     this.soundToggle.textContent = this.sound.enabled ? "🔊 効果音ON" : "🔇 効果音OFF"
+  }
+
+  toggleReveal() {
+    this.revealed = !this.revealed
+    this.updateRevealToggleLabel()
+    this.renderTarget(this.input.value)
+    this.input.focus()
+  }
+
+  updateRevealToggleLabel() {
+    this.revealToggle.textContent = this.revealed ? "👁 お手本を隠す" : "👁 お手本を見る"
+    this.revealToggle.classList.toggle("active", this.revealed)
   }
 
   reset() {
@@ -308,8 +325,14 @@ class TypingApp {
     this.progressBar.style.width = `${Math.min((value.length / total) * 100, 100)}%`
   }
 
+  // お手本ボタンで表示中は、レベルに関わらず easy と同じ見え方にする
+  displayMode() {
+    return this.revealed ? "easy" : this.level
+  }
+
   renderTarget(value) {
     const total = this.target.length
+    const mode = this.displayMode()
     let html = ""
 
     for (let i = 0; i < total; i++) {
@@ -325,9 +348,9 @@ class TypingApp {
         className += " char-pending"
       }
 
-      if (this.level === "easy") {
+      if (mode === "easy") {
         html += renderChar(targetChar, className)
-      } else if (this.level === "normal") {
+      } else if (mode === "normal") {
         if (typedChar !== undefined) {
           html += renderChar(targetChar, className)
         } else if (i === value.length) {
@@ -343,11 +366,13 @@ class TypingApp {
       // hard は target-display 自体を使わない
     }
 
-    if (this.level === "hard") {
+    if (mode === "hard") {
       this.targetDisplay.classList.add("d-none")
       this.typedDisplay.classList.remove("d-none")
       this.typedDisplay.innerHTML = this.renderTypedOnly(value)
     } else {
+      this.typedDisplay.classList.add("d-none")
+      this.targetDisplay.classList.remove("d-none")
       this.targetDisplay.innerHTML = html
     }
   }

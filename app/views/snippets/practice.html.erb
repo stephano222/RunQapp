@@ -15,7 +15,8 @@
         <%= { "easy" => "優しい(なぞる)", "normal" => "普通(ヒントあり)", "hard" => "難しい(ノーヒント)" }[@level] %>
       </span>
     </div>
-    <div class="d-flex gap-2">
+    <div class="d-flex gap-2 flex-wrap">
+      <button type="button" id="reveal-toggle" class="btn btn-sm btn-outline-primary"></button>
       <button type="button" id="sound-toggle" class="btn btn-sm btn-outline-secondary"></button>
       <button type="button" id="reset-button" class="btn btn-sm btn-outline-secondary">やり直す</button>
     </div>
