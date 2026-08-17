@@ -23,6 +23,16 @@ RUN yarn install
 
 COPY . .
 
+# 本番用アセット(CSS/JS)を事前に生成しておく。
+# ここで作らないと本番起動時に application.css が見つからず500になる。
+# SECRET_KEY_BASE と DATABASE_URL はビルド時だけのダミー値。
+RUN SECRET_KEY_BASE=dummy_for_assets_precompile \
+    DATABASE_URL=postgresql://user:pass@localhost/dummy \
+    RAILS_ENV=production \
+    bundle exec rails assets:precompile && \
+    ls public/assets/application-*.css > /dev/null
+
 EXPOSE 3000
 
-CMD ["rails", "server", "-b", "0.0.0.0"]
+ENTRYPOINT ["/myapp/bin/docker-entrypoint.sh"]
+CMD ["bundle", "exec", "puma", "-C", "config/puma.rb"]
