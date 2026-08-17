@@ -11,18 +11,18 @@
   </head>
 
   <body>
-    <%# トップページだけ夜の森、それ以外は昼の森 %>
-    <% background_image = current_page?(root_path) ? "forest_bg_night.jpg" : "forest_bg.jpg" %>
+    <%# トップページは実際の時刻に合わせて背景が変わる。それ以外は昼の森 %>
+    <% background_image = current_page?(root_path) ? background_image_for_now : "forest_bg.jpg" %>
     <div class="forest-bg" aria-hidden="true" style="background-image: url('<%= image_path(background_image) %>');"></div>
 
     <nav class="navbar navbar-expand-md navbar-dark bg-dark mb-4">
       <%# 時計を画面の右端まで寄せるため、ナビバーだけ全幅にする %>
-      <div class="container-fluid px-3">
+      <div class="container-fluid px-3 position-relative">
         <%= link_to "RunQの森", root_path, class: "navbar-brand me-0" %>
 
         <%# 折りたたみメニューの外に置き、スマホでも常に見えるようにする。
-            アプリ名とくっつかないよう ms-auto で右側へ寄せる %>
-        <span id="navbar-clock" class="navbar-text navbar-clock ms-auto"></span>
+            位置はCSSでヘッダーの中央に固定している %>
+        <span id="navbar-clock" class="navbar-text navbar-clock"></span>
 
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
           <span class="navbar-toggler-icon"></span>

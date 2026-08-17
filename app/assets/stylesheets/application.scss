@@ -39,20 +39,24 @@ main.container {
   }
 }
 
+// アプリ名とメニューの間の空きスペースの中央に置く。
+// 絶対配置で画面中央に固定するとメニューと重なるため、
+// 左右の余白を均等に取る方式にしている。
 .navbar-clock {
+  flex: 1 1 auto; // 空きスペースを引き受けて
+  text-align: center; // その中央に文字を置く
   color: #ff6b6b; // 暗いナビバーでも読めるよう明るめの赤にする
   font-weight: 500;
   font-size: 0.9rem;
   font-variant-numeric: tabular-nums; // 秒が変わっても幅が揺れない
   white-space: nowrap;
-  margin-left: auto; // スマホではアプリ名から離してハンバーガーの手前へ
 }
 
-// 横幅がある画面ではメニューのさらに右、ナビバーの末尾に置く
+// メニュー側が余白を吸ってしまうと時計が中央に来ないため、
+// 広い画面では伸縮させず自然な幅にとどめる
 @media (min-width: 768px) {
-  .navbar-clock {
-    order: 3;
-    margin-left: 1.25rem;
+  .navbar .navbar-collapse {
+    flex-grow: 0;
   }
 }
 
