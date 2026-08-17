@@ -76,15 +76,13 @@ module OmikujiHelper
     "完璧な理解を待つな。動かしてから理解が追いつく。"
   ].freeze
 
-  # 日付をもとに選ぶので、同じ日に何度開いても内容は変わらない。
-  # 「一日一回」というおみくじらしさを、DBを使わずに実現している。
+  # 開くたびに引き直せるおみくじ。運勢・和歌・言葉をそれぞれ独立に選ぶので、
+  # 組み合わせは 6 × 10 × 10 = 600通りになる。
   def omikuji_of_the_day
-    seed = Date.current.strftime("%Y%m%d").to_i
-
     {
-      fortune: FORTUNES[seed % FORTUNES.size],
-      poem: POEMS[(seed / 7) % POEMS.size],
-      word: WORDS[(seed / 3) % WORDS.size]
+      fortune: FORTUNES.sample,
+      poem: POEMS.sample,
+      word: WORDS.sample
     }
   end
 end

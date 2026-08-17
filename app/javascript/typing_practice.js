@@ -348,12 +348,13 @@ class TypingApp {
       this.themeSelect.addEventListener("change", (event) => {
         this.sound.setTheme(event.target.value)
         this.sound.preview()
-        this.input.focus()
       })
     }
     this.resetButton.addEventListener("click", () => this.reset())
+    // 余白をタップしたら入力欄に戻す。ただし操作部品の上では邪魔しない
+    // (セレクトを除外しないと、開いた瞬間にフォーカスを奪って閉じてしまう)
     this.root.addEventListener("click", (event) => {
-      if (event.target.closest("button")) return
+      if (event.target.closest("button, select, option, label, a")) return
       this.input.focus()
     })
   }

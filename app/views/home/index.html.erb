@@ -90,7 +90,9 @@
 
         <div class="text-center">
           <div class="omikuji-heading mb-1">今日の言葉</div>
-          <p class="mb-0"><%= omikuji[:word] %></p>
+          <p class="mb-3"><%= omikuji[:word] %></p>
+          <%# Turboのキャッシュで前回の結果が一瞬見えるのを防ぐため、通常の遷移にする %>
+          <%= link_to "🎋 もう一度引く", root_path, class: "btn btn-sm btn-outline-danger", data: { turbo: false } %>
         </div>
       </div>
     </div>
