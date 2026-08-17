@@ -1,0 +1,34 @@
+<% omikuji = omikuji_of_the_day %>
+<div class="row justify-content-center">
+  <div class="col-12 col-lg-8">
+    <div class="omikuji-card">
+      <div class="text-center mb-3">
+        <div class="omikuji-heading">今日の運勢</div>
+        <div class="omikuji-fortune text-<%= omikuji[:fortune][:color] %>">
+          <%= omikuji[:fortune][:level] %>
+        </div>
+        <div class="text-muted small"><%= l Date.current, format: "%Y年%-m月%-d日" %></div>
+      </div>
+
+      <div class="omikuji-poem text-center">
+        <p class="mb-1"><%= omikuji[:poem][:text] %></p>
+        <p class="small text-muted mb-2">— <%= omikuji[:poem][:author] %></p>
+        <p class="small mb-0"><%= omikuji[:poem][:note] %></p>
+      </div>
+
+      <hr class="my-3">
+
+      <div class="text-center">
+        <div class="omikuji-heading mb-1">今日の言葉</div>
+        <div class="mb-3">
+          <p class="mb-1"><%= omikuji[:word][:text] %></p>
+          <% if omikuji[:word][:source] %>
+            <p class="small text-muted mb-0">— <%= omikuji[:word][:source] %></p>
+          <% end %>
+        </div>
+        <%# Turboのキャッシュで前回の結果が一瞬見えるのを防ぐため、通常の遷移にする %>
+        <%= link_to "🎋 もう一度引く", root_path, class: "btn btn-sm btn-outline-danger", data: { turbo: false } %>
+      </div>
+    </div>
+  </div>
+</div>
