@@ -70,6 +70,26 @@
   <% elsif @level == "hard" %>
     <p class="small text-muted mt-2">お手本は表示されません。記憶を頼りに入力してください。</p>
   <% end %>
+
+  <%# 一覧に戻らずに次の課題へ進めるようにする。
+      どこへ進むのか分かるよう、次のコードの題名も添えておく。 %>
+  <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-4 pt-3 border-top">
+    <% if @next_snippet %>
+      <span class="small text-muted">
+        次は <span class="fw-semibold"><%= @next_snippet.title %></span>
+        <% if @next_snippet.category_id != @snippet.category_id %>
+          (<%= @next_snippet.category.name %>)
+        <% end %>
+      </span>
+      <%# 難易度は引き継ぐ。同じレベルで続けて練習したいことが多いため。 %>
+      <%= link_to "次へ →",
+                  practice_snippet_path(@next_snippet, level: @level),
+                  class: "btn btn-primary" %>
+    <% else %>
+      <span class="small text-muted">これが最後のコードです。おつかれさまでした。</span>
+      <%= link_to "コード一覧へ", snippets_path, class: "btn btn-outline-secondary" %>
+    <% end %>
+  </div>
 </div>
 
 <%# メモ欄。打ちながら気づいたことを書き留められるようにする。

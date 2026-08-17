@@ -47,6 +47,8 @@ class SnippetsController < ApplicationController
 
   def practice
     @level = LEVELS.include?(params[:level]) ? params[:level] : "easy"
+    # 一覧に戻らずに次の課題へ進めるようにする
+    @next_snippet = @snippet.next_in_course
   end
 
   # 練習画面から、メモだけを更新する

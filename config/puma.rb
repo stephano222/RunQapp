@@ -30,7 +30,16 @@ pidfile ENV.fetch("PIDFILE") { "tmp/pids/server.pid" }
 # Workers do not work on JRuby or Windows (both of which do not support
 # processes).
 #
-# workers ENV.fetch("WEB_CONCURRENCY") { 2 }
+# このアプリは単一モードで動かす。今の利用者数なら1プロセスで足り、
+# メモリも節約できる。
+#
+# ここで明示しないと Puma が環境変数 WEB_CONCURRENCY をそのまま読む。
+# 配置先の設定画面に 1 が残っていると「クラスターモードなのにワーカー1つ」
+# という中途半端な状態になり、親プロセスの分だけ無駄になる。
+# 設定画面の値に左右されないよう、ファイル側で決めてしまう。
+#
+# 同時アクセスが増えて分担が必要になったら、この行の数を増やす。
+workers 0
 
 # Use the `preload_app!` method when specifying a `workers` number.
 # This directive tells Puma to first boot the application and load code

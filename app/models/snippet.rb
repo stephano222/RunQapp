@@ -34,7 +34,27 @@ class Snippet < ApplicationRecord
     summary.present? || line_notes.present? || glossary.present?
   end
 
+  # 一覧画面と同じ並び(カテゴリの順 → コードのid順)で、次に練習するコードを返す。
+  # 同じカテゴリを打ち終えたら次のカテゴリの先頭へ進む。
+  # 最後のコードまで来たら nil を返し、呼び出し側で終わりを知らせる。
+  def next_in_course
+    category.snippets.where("id > ?", id).order(:id).first || first_of_following_category
+  end
+
   private
+
+  # カテゴリ自体の並びは position、同じ position なら id で決まる。
+  # 一覧の表示順と食い違わないよう、ここでも同じ条件で次を探す。
+  def first_of_following_category
+    Snippet
+      .joins(:category)
+      .where(
+        "categories.position > :position OR (categories.position = :position AND categories.id > :id)",
+        position: category.position, id: category.id
+      )
+      .order("categories.position ASC", "categories.id ASC", "snippets.id ASC")
+      .first
+  end
 
   # 区切りは前後に空白のある「 : 」。
   # コード側にも :posts や null: のような「:」が出るため、
