@@ -4,10 +4,16 @@
 //   normal(普通)   = 次の1文字だけヒント表示
 //   hard(難しい)   = お手本は一切表示せず、自分の入力だけを見て打つ
 
+// ペンタトニック音階。どの音を組み合わせても濁らないので、
+// 連打しても不快にならず気持ちよく響く。
+const PENTATONIC = [523.25, 587.33, 659.25, 783.99, 880.0, 1046.5, 1174.66, 1318.51]
+
 class SoundKit {
   constructor() {
     this.ctx = null
+    this.master = null
     this.enabled = localStorage.getItem("typingSoundEnabled") !== "false"
+    this.combo = 0
   }
 
   toggle() {
@@ -21,45 +27,147 @@ class SoundKit {
       const AudioContextClass = window.AudioContext || window.webkitAudioContext
       if (!AudioContextClass) return null
       this.ctx = new AudioContextClass()
+
+      // 全体の音量とほんのり残響。単音のピコピコ感が消えて厚みが出る。
+      this.master = this.ctx.createGain()
+      this.master.gain.value = 0.9
+      this.master.connect(this.ctx.destination)
+
+      const convolver = this.ctx.createConvolver()
+      convolver.buffer = this.buildReverb(1.1)
+      const wet = this.ctx.createGain()
+      wet.gain.value = 0.35
+      convolver.connect(wet)
+      wet.connect(this.ctx.destination)
+      this.reverb = convolver
     }
     if (this.ctx.state === "suspended") this.ctx.resume()
     return this.ctx
   }
 
-  beep({ frequency, duration, type = "sine", gain = 0.06 }) {
+  // 短いノイズを減衰させて簡易的な残響を作る
+  buildReverb(seconds) {
+    const rate = this.ctx.sampleRate
+    const length = Math.floor(rate * seconds)
+    const buffer = this.ctx.createBuffer(2, length, rate)
+    for (let ch = 0; ch < 2; ch++) {
+      const data = buffer.getChannelData(ch)
+      for (let i = 0; i < length; i++) {
+        data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / length, 2.5)
+      }
+    }
+    return buffer
+  }
+
+  tone({ frequency, duration, type = "sine", gain = 0.06, delay = 0, slideTo = null }) {
     if (!this.enabled) return
     const ctx = this.ensureContext()
     if (!ctx) return
 
-    const oscillator = ctx.createOscillator()
-    const gainNode = ctx.createGain()
-    oscillator.type = type
-    oscillator.frequency.value = frequency
-    gainNode.gain.value = gain
-    oscillator.connect(gainNode)
-    gainNode.connect(ctx.destination)
+    const osc = ctx.createOscillator()
+    const amp = ctx.createGain()
+    osc.type = type
+    osc.connect(amp)
+    amp.connect(this.master)
+    amp.connect(this.reverb)
 
-    const now = ctx.currentTime
-    gainNode.gain.setValueAtTime(gain, now)
-    gainNode.gain.exponentialRampToValueAtTime(0.0001, now + duration)
-    oscillator.start(now)
-    oscillator.stop(now + duration)
+    const start = ctx.currentTime + delay
+    osc.frequency.setValueAtTime(frequency, start)
+    if (slideTo) osc.frequency.exponentialRampToValueAtTime(slideTo, start + duration)
+
+    // 立ち上がりを一瞬にして、余韻を残すと打鍵感が出る
+    amp.gain.setValueAtTime(0.0001, start)
+    amp.gain.exponentialRampToValueAtTime(gain, start + 0.008)
+    amp.gain.exponentialRampToValueAtTime(0.0001, start + duration)
+
+    osc.start(start)
+    osc.stop(start + duration + 0.02)
   }
 
+  // 正解: 打つほど音階が上がっていき、ノってくる感覚を出す
   correctKey() {
-    this.beep({ frequency: 720, duration: 0.05, type: "square", gain: 0.05 })
+    const step = Math.min(this.combo, PENTATONIC.length - 1)
+    const frequency = PENTATONIC[step]
+
+    this.tone({ frequency, duration: 0.18, type: "triangle", gain: 0.09 })
+    // 1オクターブ上を小さく重ねてキラッとさせる
+    this.tone({ frequency: frequency * 2, duration: 0.12, type: "sine", gain: 0.035 })
+
+    this.combo++
+    // コンボが乗ったら節目でご褒美の和音
+    if (this.combo > 0 && this.combo % 8 === 0) this.comboChord()
   }
 
-  wrongKey() {
-    this.beep({ frequency: 160, duration: 0.09, type: "sawtooth", gain: 0.06 })
-  }
-
-  complete() {
-    if (!this.enabled) return
-    const notes = [523.25, 659.25, 783.99]
-    notes.forEach((frequency, i) => {
-      setTimeout(() => this.beep({ frequency, duration: 0.18, type: "sine", gain: 0.05 }), i * 90)
+  comboChord() {
+    const base = 523.25
+    ;[1, 1.25, 1.5].forEach((ratio, i) => {
+      this.tone({
+        frequency: base * ratio * 2,
+        duration: 0.35,
+        type: "sine",
+        gain: 0.05,
+        delay: i * 0.04
+      })
     })
+  }
+
+  // ミス: コンボが途切れる。下降する音で「外した」感を出す
+  wrongKey() {
+    this.combo = 0
+    this.tone({ frequency: 320, duration: 0.22, type: "sawtooth", gain: 0.07, slideTo: 90 })
+    this.tone({ frequency: 160, duration: 0.18, type: "square", gain: 0.05 })
+  }
+
+  reset() {
+    this.combo = 0
+  }
+
+  // クリア: 駆け上がってから和音で締めるファンファーレ
+  complete(perfect = false) {
+    if (!this.enabled) return
+    const scale = [523.25, 659.25, 783.99, 1046.5, 1318.51]
+
+    scale.forEach((frequency, i) => {
+      this.tone({
+        frequency,
+        duration: 0.3,
+        type: "triangle",
+        gain: 0.09,
+        delay: i * 0.075
+      })
+      this.tone({
+        frequency: frequency * 2,
+        duration: 0.22,
+        type: "sine",
+        gain: 0.04,
+        delay: i * 0.075
+      })
+    })
+
+    // 最後に厚い和音を鳴らして締める
+    const finalDelay = scale.length * 0.075 + 0.05
+    ;[523.25, 659.25, 783.99, 1046.5].forEach((frequency) => {
+      this.tone({
+        frequency,
+        duration: perfect ? 1.4 : 0.9,
+        type: "triangle",
+        gain: 0.07,
+        delay: finalDelay
+      })
+    })
+
+    // ノーミスならさらにキラキラを追加
+    if (perfect) {
+      ;[1567.98, 2093.0, 2637.02].forEach((frequency, i) => {
+        this.tone({
+          frequency,
+          duration: 0.5,
+          type: "sine",
+          gain: 0.045,
+          delay: finalDelay + 0.12 + i * 0.09
+        })
+      })
+    }
   }
 }
 
@@ -128,6 +236,7 @@ class TypingApp {
     this.previousValue = ""
     this.mistakeCount = 0
     this.startTime = null
+    this.sound.reset()
     this.input.value = ""
     this.input.disabled = false
     this.stopTimer()
@@ -257,7 +366,6 @@ class TypingApp {
     this.finished = true
     this.stopTimer()
     this.input.disabled = true
-    this.sound.complete()
 
     const durationMs = this.startTime ? Math.round(performance.now() - this.startTime) : 0
     const total = this.target.length
@@ -265,6 +373,9 @@ class TypingApp {
     for (let i = 0; i < total; i++) {
       if (value[i] === this.target[i]) correct++
     }
+
+    // ノーミスで打ち切れたときは、より豪華なファンファーレを鳴らす
+    this.sound.complete(this.mistakeCount === 0 && correct === total)
     const accuracy = Math.round((correct / total) * 1000) / 10
 
     const response = await fetch("/attempts", {

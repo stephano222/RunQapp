@@ -7,16 +7,24 @@ test_user.name = "テストユーザー"
 test_user.password = "test1234"
 test_user.save!
 
-routing = Category.find_or_create_by!(name: "ルーティング") { |c| c.position = 1 }
-mvc     = Category.find_or_create_by!(name: "コントローラ") { |c| c.position = 2 }
-model   = Category.find_or_create_by!(name: "モデル・バリデーション") { |c| c.position = 3 }
-ar      = Category.find_or_create_by!(name: "ActiveRecordクエリ") { |c| c.position = 4 }
-migrate = Category.find_or_create_by!(name: "マイグレーション") { |c| c.position = 5 }
-view    = Category.find_or_create_by!(name: "ビュー・フォーム") { |c| c.position = 6 }
-auth    = Category.find_or_create_by!(name: "認証・セキュリティ") { |c| c.position = 7 }
-spec    = Category.find_or_create_by!(name: "テスト(RSpec)") { |c| c.position = 8 }
-cfg     = Category.find_or_create_by!(name: "コマンド・設定") { |c| c.position = 9 }
-html    = Category.find_or_create_by!(name: "HTML") { |c| c.position = 10 }
+# 既存カテゴリでも並び順を確実に反映させるため find_or_create_by! ではなく明示的に更新する
+def upsert_category(name, position)
+  category = Category.find_or_initialize_by(name: name)
+  category.position = position
+  category.save!
+  category
+end
+
+routing = upsert_category("ルーティング", 1)
+mvc     = upsert_category("コントローラ", 2)
+model   = upsert_category("モデル・バリデーション", 3)
+ar      = upsert_category("ActiveRecordクエリ", 4)
+migrate = upsert_category("マイグレーション", 5)
+view    = upsert_category("ビュー・フォーム", 6)
+auth    = upsert_category("認証・セキュリティ", 7)
+spec    = upsert_category("テスト(RSpec)", 8)
+cfg     = upsert_category("コマンド・設定", 9)
+html    = upsert_category("HTML", 10)
 
 Snippet.official.destroy_all
 
@@ -728,5 +736,151 @@ CODE
   Gemfile.lock は必ずGitにコミットする。これを共有しないと
   「自分の環境では動くのに他の人の環境では動かない」原因になる。
 EXP
+
+# ============================================================
+# HTML
+# ============================================================
+
+seed_snippet(html, "HTMLの基本構造", <<~CODE, <<~EXP, "html")
+  <!DOCTYPE html>
+  <html lang="ja">
+    <head>
+      <meta charset="UTF-8">
+      <title>ページタイトル</title>
+    </head>
+    <body>
+    </body>
+  </html>
+CODE
+  すべてのHTMLファイルの土台となる形。
+
+  【重要】各行の役割。
+    <!DOCTYPE html> → HTML5で書くという宣言(1行目に必須)
+    lang="ja"       → 日本語のページだと伝える(読み上げソフトや翻訳が正しく動く)
+    charset="UTF-8" → 文字コードの指定(これが無いと日本語が文字化けする)
+
+  head は画面に表示されない情報、body は実際に表示される内容を書く。
+EXP
+
+seed_snippet(html, "見出しと段落", <<~CODE, <<~EXP, "html")
+  <h1>大見出し</h1>
+  <h2>中見出し</h2>
+  <p>これは段落のテキストです。</p>
+CODE
+  文章の構造を表すタグ。
+
+  【重要】h1 は1ページに1つだけにする。
+  見出しは h1 → h2 → h3 と順番に使い、飛ばさないのが原則。
+  検索エンジンや読み上げソフトが、この階層でページ構造を理解している。
+
+  「文字を大きくしたいから h1」という使い方は間違い。
+  見た目はCSSで調整し、タグは意味で選ぶ。
+EXP
+
+seed_snippet(html, "リンクと画像", <<~CODE, <<~EXP, "html")
+  <a href="https://example.com">リンクテキスト</a>
+  <img src="/images/photo.jpg" alt="写真の説明">
+CODE
+  Webページの根幹となる2つのタグ。
+
+  【重要】alt属性は省略しない。
+  画像が読み込めなかったときに代わりに表示され、
+  目の見えない人が使う読み上げソフトはこの文章を読み上げる。
+
+  別タブで開きたいときは target="_blank" を付けるが、
+  セキュリティ上 rel="noopener" も一緒に付けるのが推奨される。
+EXP
+
+seed_snippet(html, "リスト", <<~CODE, <<~EXP, "html")
+  <ul>
+    <li>箇条書きの項目</li>
+    <li>2つ目の項目</li>
+  </ul>
+CODE
+  箇条書きを作るタグ。
+
+  【重要】2種類の使い分け。
+    <ul> → 順序が関係ないリスト(メニュー、特徴の列挙など)
+    <ol> → 順序に意味があるリスト(手順、ランキングなど。番号が自動で付く)
+
+  どちらも中身は必ず <li> で囲む。li 以外を直接入れてはいけない。
+  ナビゲーションメニューは ul で作るのが一般的。
+EXP
+
+seed_snippet(html, "フォーム", <<~CODE, <<~EXP, "html")
+  <form action="/posts" method="post">
+    <label for="title">タイトル</label>
+    <input type="text" id="title" name="title">
+    <button type="submit">送信</button>
+  </form>
+CODE
+  ユーザーからの入力を受け取る仕組み。
+
+  【重要】name属性が最も大事。
+  サーバー側はこの name をキーにして値を受け取る(Railsなら params[:title])。
+  name が無いと、入力しても値が送信されない。
+
+  label の for と input の id を一致させると、
+  ラベルをクリックしただけで入力欄が選択される。使いやすさが大きく変わる。
+EXP
+
+seed_snippet(html, "input の種類", <<~CODE, <<~EXP, "html")
+  <input type="email" name="email" required>
+  <input type="password" name="password">
+  <input type="number" name="age" min="0">
+CODE
+  入力欄の型を指定すると、ブラウザが自動で検証や最適化をしてくれる。
+
+  【重要】type を適切に選ぶ利点。
+    email    → 形式が正しいかブラウザが自動チェック
+    password → 入力内容が「●●●」で隠れる
+    number   → スマホで数字キーボードが開く
+
+  required を付けると、空のまま送信しようとした時点でブラウザが止めてくれる。
+  【注意】ブラウザ側の検証は回避できるので、サーバー側の検証も必ず行う。
+EXP
+
+seed_snippet(html, "div と span", <<~CODE, <<~EXP, "html")
+  <div class="card">
+    <span class="badge">新着</span>
+  </div>
+CODE
+  意味を持たない、まとめるためだけのタグ。
+
+  【重要】2つの違いは配置のされ方。
+    div  → ブロック要素(前後で改行され、縦に積まれる)
+    span → インライン要素(文章の途中に置ける。改行されない)
+
+  レイアウトの箱を作るなら div、文章中の一部だけ装飾するなら span。
+
+  【注意】何でも div にするのは避ける。見出しなら h2、
+  ナビゲーションなら nav のように、意味のあるタグを優先する。
+EXP
+
+seed_snippet(html, "テーブル(表)", <<~CODE, <<~EXP, "html")
+  <table>
+    <thead>
+      <tr><th>名前</th><th>年齢</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>太郎</td><td>20</td></tr>
+    </tbody>
+  </table>
+CODE
+  表形式のデータを表示する。
+
+  【重要】タグの対応関係。
+    tr → 横1行(table row)
+    th → 見出しセル(table header。太字で中央寄せになる)
+    td → データセル(table data)
+
+  thead(見出し部分)と tbody(データ部分)で分けると構造が明確になる。
+
+  【注意】表はデータを見せるためのもの。レイアウト目的で使ってはいけない。
+EXP
+
+# カテゴリ名を再編したことで空になった旧カテゴリを片付ける。
+# ユーザーが追加したコードが1件でも残っているカテゴリは削除しない。
+Category.left_joins(:snippets).where(snippets: { id: nil }).destroy_all
 
 puts "Seed完了: カテゴリ#{Category.count}件 / 公式スニペット#{Snippet.official.count}件"
