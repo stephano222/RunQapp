@@ -17,9 +17,11 @@ services:
         value: "true"
       - key: RAILS_LOG_TO_STDOUT
         value: "true"
-      # 無料プラン(512MB)ではワーカー1つのほうが起動が速くメモリも安定する
+      # 0 にするとワーカーを分けない単一モードで動く。
+      # 1 だとクラスターモードのままワーカーが1つだけという中途半端な状態になり、
+      # 親プロセスの分だけメモリを余計に使う。512MBの枠では単一モードが適している。
       - key: WEB_CONCURRENCY
-        value: "1"
+        value: "0"
 
 databases:
   - name: rundaappkai-db
