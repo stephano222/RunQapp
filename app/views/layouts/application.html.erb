@@ -16,12 +16,13 @@
     <div class="forest-bg" aria-hidden="true" style="background-image: url('<%= image_path(background_image) %>');"></div>
 
     <nav class="navbar navbar-expand-md navbar-dark bg-dark mb-4">
-      <div class="container">
+      <%# 時計を画面の右端まで寄せるため、ナビバーだけ全幅にする %>
+      <div class="container-fluid px-3">
         <%= link_to "RunQの森", root_path, class: "navbar-brand me-0" %>
 
         <%# 折りたたみメニューの外に置き、スマホでも常に見えるようにする。
             アプリ名とくっつかないよう ms-auto で右側へ寄せる %>
-        <span id="navbar-clock" class="navbar-text navbar-clock ms-auto me-3"></span>
+        <span id="navbar-clock" class="navbar-text navbar-clock ms-auto"></span>
 
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
           <span class="navbar-toggler-icon"></span>
