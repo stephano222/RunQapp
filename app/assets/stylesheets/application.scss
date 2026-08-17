@@ -40,7 +40,8 @@ main.container {
 }
 
 .navbar-clock {
-  color: #e8f0e6;
+  color: #ff6b6b; // 暗いナビバーでも読めるよう明るめの赤にする
+  font-weight: 500;
   font-size: 0.9rem;
   font-variant-numeric: tabular-nums; // 秒が変わっても幅が揺れない
   white-space: nowrap;

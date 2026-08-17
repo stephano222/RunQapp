@@ -591,13 +591,12 @@ class WhackGame {
 }
 
 // ============================================================
-// 5〜7. スポーツ系(左右に動くゲージを止めて狙う)
+// 5. アイスホッケー(左右に動く狙いを止めて撃つ)
 // ============================================================
 
 const AIM_TRIES = 10
 
-// バスケ・サッカー・ホッケーは「動く狙いを止める」共通の遊び方。
-// 設定だけ差し替えて3種類にしている。
+// 「動く狙いを止める」型のゲームの土台。設定を差し替えれば増やせる。
 class AimGameBase {
   constructor(ui) {
     this.ui = ui
@@ -718,38 +717,6 @@ class AimGameBase {
   }
 }
 
-class BasketGame extends AimGameBase {
-  static title = "🏀 バスケシュート"
-  static hint = "左右に動くボールが中央に来たらタップ。真ん中ほど高得点です。"
-  static bestKey = "gameBestBasket"
-  static config = {
-    ball: "🏀",
-    goal: "🥅",
-    player: "🐻",
-    background: "linear-gradient(180deg, #ffe0b2 0%, #ffcc80 100%)",
-    speed: 95,
-    unit: "本",
-    perfect: "スリーポイント！",
-    good: "ゴール！"
-  }
-}
-
-class SoccerGame extends AimGameBase {
-  static title = "⚽ サッカーPK"
-  static hint = "左右に動くボールが中央に来たらタップ。真ん中ほど高得点です。"
-  static bestKey = "gameBestSoccer"
-  static config = {
-    ball: "⚽",
-    goal: "🥅",
-    player: "🦊",
-    background: "linear-gradient(180deg, #c8e6c9 0%, #a5d6a7 100%)",
-    speed: 110,
-    unit: "本",
-    perfect: "ゴール左上ギリギリ！",
-    good: "ゴール！"
-  }
-}
-
 class HockeyGame extends AimGameBase {
   static title = "🏒 アイスホッケー"
   static hint = "左右に動くパックが中央に来たらタップ。真ん中ほど高得点です。"
@@ -770,15 +737,7 @@ class HockeyGame extends AimGameBase {
 // 共通処理
 // ============================================================
 
-const GAMES = [
-  ShootingGame,
-  BattingGame,
-  DropGame,
-  WhackGame,
-  BasketGame,
-  SoccerGame,
-  HockeyGame
-]
+const GAMES = [ShootingGame, BattingGame, DropGame, WhackGame, HockeyGame]
 
 function burst(stage, x, y) {
   const el = document.createElement("div")
