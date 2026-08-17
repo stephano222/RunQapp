@@ -39,6 +39,77 @@ main.container {
   }
 }
 
+.omikuji-card {
+  background: #fffdf6;
+  border: 1px solid #e0d5b8;
+  border-top: 5px solid #b03a3a;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  box-shadow: 0 2px 12px rgba(80, 60, 30, 0.1);
+}
+
+.omikuji-heading {
+  font-size: 0.85rem;
+  letter-spacing: 0.3em;
+  color: #8a7550;
+}
+
+.omikuji-fortune {
+  font-size: 2.6rem;
+  font-weight: 700;
+  line-height: 1.2;
+  font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
+}
+
+.omikuji-poem {
+  font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
+  font-size: 1.05rem;
+  line-height: 2;
+  color: #3d3428;
+}
+
+.acorn-stage {
+  position: relative;
+  height: 220px;
+  border-radius: 0.75rem;
+  background: linear-gradient(180deg, #dff2d8 0%, #c3e6bb 100%);
+  border: 1px solid #a9d6a0;
+  overflow: hidden;
+  touch-action: manipulation;
+}
+
+.acorn-item {
+  position: absolute;
+  font-size: 2rem;
+  line-height: 1;
+  background: transparent;
+  border: none;
+  padding: 0.15rem;
+  cursor: pointer;
+  animation: acorn-pop 0.18s ease-out;
+}
+
+.acorn-got {
+  animation: acorn-take 0.15s ease-out forwards;
+}
+
+.acorn-bad {
+  animation: acorn-shake 0.15s ease-out forwards;
+}
+
+@keyframes acorn-pop {
+  from { transform: scale(0.4); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes acorn-take {
+  to { transform: scale(1.7) translateY(-14px); opacity: 0; }
+}
+
+@keyframes acorn-shake {
+  to { transform: scale(0.5) rotate(25deg); opacity: 0; }
+}
+
 .typing-display {
   font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
   font-size: 1rem;
