@@ -363,27 +363,161 @@ class CodeTranslator
     found.sort_by { |w| [-w.length, w] }.map { |w| [w, DICTIONARY[w]] }
   end
 
-  # 全体の要約。何のコードかを推測して一文にする。
+  # 全行の意味をつないだ通し訳。
+  # 1行ごとの訳を並べるだけでは読みにくいので、
+  # 「まとまりの終わり」のような単体では意味の薄い行は省き、
+  # 文章として流れるように接続する。
+  SKIP_IN_PROSE = ["まとまりの終わり"].freeze
+
+  def prose
+    meanings = line_translations.filter_map { |_number, _raw, meaning| meaning }
+    meanings = meanings.reject { |m| SKIP_IN_PROSE.include?(m) }
+
+    return nil if meanings.empty?
+
+    # 読点でつなぎ、最後だけ句点で締める
+    body = meanings.each_with_index.map do |meaning, index|
+      last = index == meanings.size - 1
+      last ? meaning : "#{meaning}、"
+    end.join
+
+    "#{body}。".gsub("、。", "。").gsub("。。", "。")
+  end
+
+  # 全体の要約。
+  # 「何という名前の、何であるか」を主語にし、そこで具体的に何をしているかを
+  # 中身から読み取って続ける。単なるキーワードの有無ではなく、
+  # 対象の名前まで拾うことで内容のある一文にする。
   def summary
-    parts = []
+    subject = detect_subject
+    activities = detect_activities
 
-    parts << "#{Regexp.last_match(1)}という部品の定義" if code =~ /class\s+(\S+)/
-    parts << "データの入力チェック" if code.include?("validates")
-    parts << "テーブル同士の関連付け" if code =~ /has_many|belongs_to|has_one/
-    parts << "画面ごとの処理の振り分け" if code =~ /def (index|show|new|create|edit|update|destroy)\b/
-    parts << "URLと処理の対応付け" if code =~ /resources|root\s|namespace/
-    parts << "データベースの構造変更" if code =~ /create_table|add_column|add_index/
-    parts << "データの検索・取得" if code =~ /\.where|\.find|\.all\b/
-    parts << "画面の組み立て" if code =~ /<html|<div|<form|form_with|link_to/
-    parts << "動作の検証" if code =~ /describe|expect|it\s+"/
-    parts << "ログインの仕組み" if code =~ /session|has_secure_password|current_user/
+    return subject if activities.empty?
 
-    return "短いコード片です。下の1行ごとの意味を確認してください。" if parts.empty?
+    "#{subject}#{activities.join('、')}。"
+  end
 
-    "#{parts.uniq.join('、')}を行っているコードです。"
+  # このコードがアプリの中でどんな役割を担うのかを説明する。
+  # 要約が「何をしているか」なのに対し、こちらは「なぜ必要か」を伝える。
+  ROLE_DESCRIPTIONS = {
+    controller: "利用者の操作を受け取り、必要なデータを用意して、どの画面を見せるかを決める橋渡し役です。" \
+                "ブラウザからの要求はまずここに届き、モデルとビューをつなぎます。",
+    model: "データベースの1つの表に対応し、保存する値の決まりや他の表とのつながりを定めます。" \
+           "「正しいデータだけを通す門番」の役割を持ちます。",
+    migration: "データベースの設計図を書き換える指示書です。" \
+               "一度実行すると記録が残り、チーム全員が同じ構造を再現できます。",
+    routes: "どのURLに来たら、どの処理を動かすかの案内図です。" \
+            "ここに書かれていないURLは開くことができません。",
+    view: "利用者が実際に目にする画面の中身です。" \
+          "コントローラが用意したデータを、見える形に組み立てます。",
+    spec: "コードが期待どおり動くかを自動で確かめる仕組みです。" \
+          "変更したときに、壊れていないかをすぐ検知できます。",
+    html: "文書の構造を示すための記述です。" \
+          "見出し・段落・リンクといった意味づけを行い、ブラウザに伝えます。"
+  }.freeze
+
+  def role
+    ROLE_DESCRIPTIONS[detect_kind]
   end
 
   private
+
+  # コードの種類を判定する。要約と役割説明の両方から使う。
+  def detect_kind
+    return :controller if code =~ /class\s+\w+Controller\s*</
+    return :model      if code =~ /class\s+\w+\s*<\s*ApplicationRecord/
+    return :migration  if code =~ /ActiveRecord::Migration|create_table|add_column|add_index/
+    return :routes     if code =~ /Rails\.application\.routes\.draw/ || code =~ /^\s*resources\s+:/
+    return :spec       if code =~ /RSpec\.describe|describe\s+["']|expect\(/
+    return :view       if code =~ /form_with|link_to|render\s+["']|<%=/
+    return :html       if code =~ /<!DOCTYPE html|<html|<div|<p>|<form/
+
+    nil
+  end
+
+  # 「何のコードか」を、名前まで含めて特定する。
+  def detect_subject
+    if code =~ /class\s+(\w+)Controller\s*</
+      "#{Regexp.last_match(1)}に関する画面の処理をまとめたコントローラです。"
+    elsif code =~ /class\s+(\w+)\s*<\s*ApplicationRecord/
+      "#{Regexp.last_match(1)}というデータの形を定めたモデルです。"
+    elsif code =~ /RSpec\.describe\s+(\w+)/ || code =~ /describe\s+["']?(\w+)/
+      "#{Regexp.last_match(1)}が正しく動くかを確かめるテストです。"
+    elsif code =~ /class\s+(\w+)\s*<\s*ActiveRecord::Migration/
+      "データベースの構造を変更するマイグレーションです。"
+    elsif code =~ /Rails\.application\.routes\.draw/
+      "URLとどの処理を結び付けるかを定めたルーティングです。"
+    elsif code =~ /class\s+(\w+)/
+      "#{Regexp.last_match(1)}というまとまりを定めたコードです。"
+    elsif code =~ /\A\s*<!DOCTYPE html/i || code =~ /<html/
+      "1ページ分のHTML文書です。"
+    elsif code =~ /<\w+[^>]*>/
+      "画面の見た目を組み立てるHTMLです。"
+    elsif code =~ /create_table|add_column|add_index/
+      "データベースの構造を変更するコードです。"
+    elsif code =~ /^\s*(resources|root|namespace|get|post)\s/
+      "URLと処理の対応を定めたルーティングです。"
+    else
+      "コードの断片です。"
+    end
+  end
+
+  # 中で実際に行っていることを、対象の名前まで拾って並べる。
+  def detect_activities
+    items = []
+
+    if (names = code.scan(/validates\s+:(\w+)/).flatten).any?
+      items << "#{names.uniq.join('と')}の入力内容を検査し"
+    end
+
+    if (names = code.scan(/has_many\s+:(\w+)/).flatten).any?
+      items << "#{names.uniq.join('と')}を複数持つ関係を定義し"
+    end
+
+    if (names = code.scan(/belongs_to\s+:(\w+)/).flatten).any?
+      items << "#{names.uniq.join('と')}に属する関係を定義し"
+    end
+
+    if (actions = code.scan(/def\s+(index|show|new|create|edit|update|destroy)\b/).flatten).any?
+      items << "#{actions.uniq.map { |a| ACTION_NAMES[a] }.join('・')}の処理を用意し"
+    end
+
+    items << "ログインの仕組みを用意し" if code =~ /has_secure_password|session\[|current_user/
+    items << "処理の前に共通の下準備をし" if code.include?("before_action")
+
+    if (models = code.scan(/(\w+)\.(?:where|find_by|find|all)\b/).flatten).any?
+      items << "#{models.uniq.first}からデータを取り出し"
+    end
+
+    items << "条件によって処理を分岐し" if code =~ /^\s*if\s|unless\s/
+    items << "受け取ってよい値を限定し" if code.include?("permit")
+    items << "画面の表示や移動を指示し" if code =~ /redirect_to|render\s/
+
+    if (tables = code.scan(/create_table\s+:(\w+)/).flatten).any?
+      items << "#{tables.join('と')}という表を作成し"
+    end
+
+    if (paths = code.scan(/resources\s+:(\w+)/).flatten).any?
+      items << "#{paths.join('と')}への経路を用意し"
+    end
+
+    return [] if items.empty?
+
+    # 各項目は「〜し」で終わる形に揃えてあるので、
+    # 最後だけ「〜しています」に変えて文として締める
+    items[-1] = "#{items.last.sub(/し\z/, '')}しています"
+    items
+  end
+
+  ACTION_NAMES = {
+    "index" => "一覧",
+    "show" => "詳細",
+    "new" => "新規作成画面",
+    "create" => "登録",
+    "edit" => "編集画面",
+    "update" => "更新",
+    "destroy" => "削除"
+  }.freeze
 
   # 単語として独立して現れているかを判定する。
   # 「?」で終わる語(exists? など)は \b が効かないため個別に扱う。

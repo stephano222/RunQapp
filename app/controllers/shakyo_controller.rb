@@ -5,6 +5,7 @@ class ShakyoController < ApplicationController
   before_action :require_login
 
   MAX_LENGTH = 20_000
+  LEVELS = %w[easy normal hard].freeze
 
   def new
   end
@@ -23,5 +24,6 @@ class ShakyoController < ApplicationController
     end
 
     @title = params[:title].presence || "名称未設定の写経"
+    @level = LEVELS.include?(params[:level]) ? params[:level] : "easy"
   end
 end

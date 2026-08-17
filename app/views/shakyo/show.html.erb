@@ -1,12 +1,24 @@
-<script type="application/json" id="shakyo-data"><%= raw({ code: @code }.to_json.gsub("</", "<\\/")) %></script>
+<script type="application/json" id="shakyo-data"><%= raw({
+  code: @code,
+  level: @level
+}.to_json.gsub("</", "<\\/")) %></script>
 
 <p><%= link_to "← 別のコードを写経する", shakyo_path %></p>
 
 <div id="shakyo-app">
   <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-    <h1 class="h5 mb-0"><%= @title %></h1>
+    <div>
+      <h1 class="h5 mb-1"><%= @title %></h1>
+      <span class="badge <%= { "easy" => "bg-success", "normal" => "bg-warning text-dark", "hard" => "bg-danger" }[@level] %>">
+        <%= { "easy" => "優しい(なぞる)", "normal" => "普通(ヒントあり)", "hard" => "難しい(ノーヒント)" }[@level] %>
+      </span>
+    </div>
     <div class="d-flex gap-2 flex-wrap align-items-center">
-      <span class="small text-muted" id="shakyo-progress"></span>
+      <% unless @level == "easy" %>
+        <button type="button" id="shakyo-reveal" class="btn btn-sm btn-outline-primary"></button>
+      <% end %>
+      <select id="shakyo-theme" class="form-select form-select-sm w-auto" aria-label="効果音の種類"></select>
+      <button type="button" id="shakyo-sound" class="btn btn-sm btn-outline-secondary"></button>
       <button type="button" id="shakyo-reset" class="btn btn-sm btn-outline-secondary">最初から</button>
     </div>
   </div>
@@ -15,12 +27,31 @@
     <div id="shakyo-bar" class="progress-bar bg-success" role="progressbar" style="width: 0%;"></div>
   </div>
 
-  <%# お手本。写し終えた行は薄くなり、今写している行が強調される %>
+  <div class="row g-3 mb-3 text-center">
+    <div class="col-4">
+      <div class="fs-5 fw-bold" id="shakyo-accuracy">100%</div>
+      <div class="small text-muted">正答率</div>
+    </div>
+    <div class="col-4">
+      <div class="fs-5 fw-bold" id="shakyo-mistakes">0</div>
+      <div class="small text-muted">ミス数</div>
+    </div>
+    <div class="col-4">
+      <div class="fs-5 fw-bold" id="shakyo-progress">0 / 0 行</div>
+      <div class="small text-muted">進捗</div>
+    </div>
+  </div>
+
+  <%# 全体のお手本。今写している行が強調される %>
   <pre id="shakyo-source" class="typing-display mb-3"></pre>
 
   <div class="mb-2 small text-muted">
-    今この行を写しています(Enterで次の行へ)
+    今この行をなぞって入力しています(1行打ち終えたらEnterで次へ)
   </div>
+
+  <%# 現在行のなぞり表示。1文字ずつ正誤が色分けされる %>
+  <pre id="shakyo-line" class="typing-display mb-2"></pre>
+
   <textarea
     id="shakyo-input"
     class="form-control typing-input"

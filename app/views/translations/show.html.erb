@@ -2,12 +2,30 @@
 
 <h1 class="h4 mb-3">和訳結果</h1>
 
+<% if @translator.role %>
+  <div class="card mb-4 border-primary">
+    <div class="card-body">
+      <div class="translation-label mb-2">このコードの役割</div>
+      <p class="mb-0"><%= @translator.role %></p>
+    </div>
+  </div>
+<% end %>
+
 <div class="card mb-4">
   <div class="card-body">
-    <div class="translation-label mb-2">全体の意味</div>
+    <div class="translation-label mb-2">全体の意味(要約)</div>
     <p class="mb-0"><%= @translator.summary %></p>
   </div>
 </div>
+
+<% if @translator.prose %>
+  <div class="card mb-4">
+    <div class="card-body">
+      <div class="translation-label mb-2">全体の意味(通し訳)</div>
+      <p class="mb-0"><%= @translator.prose %></p>
+    </div>
+  </div>
+<% end %>
 
 <div class="card mb-4">
   <div class="card-body">
