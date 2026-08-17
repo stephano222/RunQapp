@@ -36,7 +36,10 @@
 
       <div class="text-center mt-3">
         <%# Turboのキャッシュで前回の結果が一瞬見えるのを防ぐため、通常の遷移にする %>
-        <%= link_to "🎋 もう一度引く", root_path, class: "btn btn-sm btn-outline-danger", data: { turbo: false } %>
+        <%= link_to (poem_only ? "📜 次の和歌を見る" : "🎋 もう一度引く"),
+                    root_path,
+                    class: "btn btn-sm btn-outline-danger",
+                    data: { turbo: false } %>
       </div>
     </div>
   </div>
