@@ -12,9 +12,8 @@
 
   <body>
     <%# 背景はどのページでも時刻に合わせて変わる。
-        ログイン前のトップページだけは鮮明な写真、それ以外は文字が読みやすい透明化版を使う %>
-    <% vivid = current_page?(root_path) && !logged_in? %>
-    <% background_image = background_image_for_now(vivid: vivid) %>
+        ログイン前は鮮明な写真、ログイン後は学習に集中できるよう透明化版を使う %>
+    <% background_image = background_image_for_now(vivid: !logged_in?) %>
     <div class="forest-bg" aria-hidden="true" style="background-image: url('<%= image_path(background_image) %>');"></div>
 
     <nav class="navbar navbar-expand-md navbar-dark bg-dark mb-4">
