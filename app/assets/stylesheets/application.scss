@@ -55,6 +55,25 @@ main.container {
   }
 }
 
+// ナビバーは時計を右端まで届かせるため全幅にしているが、
+// アプリ名は下のコンテンツ(.container)の左端と揃える。
+// Bootstrapのcontainerと同じ最大幅で、中央寄せ時の左余白を再現する。
+@media (min-width: 576px) {
+  .navbar-brand { margin-left: calc((100% - 540px) / 2); }
+}
+@media (min-width: 768px) {
+  .navbar-brand { margin-left: calc((100% - 720px) / 2); }
+}
+@media (min-width: 992px) {
+  .navbar-brand { margin-left: calc((100% - 960px) / 2); }
+}
+@media (min-width: 1200px) {
+  .navbar-brand { margin-left: calc((100% - 1140px) / 2); }
+}
+@media (min-width: 1400px) {
+  .navbar-brand { margin-left: calc((100% - 1320px) / 2); }
+}
+
 
 @media (max-width: 400px) {
   .navbar-clock {
