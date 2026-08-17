@@ -13,15 +13,20 @@ test_user.update_columns(admin: false) if test_user.admin?
 
 # 管理者アカウント。メールアドレスを環境変数で渡したときだけ権限を与える。
 # パスワードはこのファイルに書かず、各自が新規登録した上で指定する。
-if (admin_email = ENV["ADMIN_EMAIL"].presence)
-  admin = User.find_by(email: admin_email.downcase)
-
-  if admin
+if (admin_email = User.admin_email)
+  if (admin = User.find_by(email: admin_email))
     admin.update_columns(admin: true)
     puts "管理者に設定しました: #{admin.email}"
   else
-    puts "ADMIN_EMAIL に指定された #{admin_email} が見つかりません。先に新規登録してください。"
+    # 一致しなかったときは原因を切り分けられるだけの情報を残す。
+    # 値そのものではなく inspect で出すと、空白や改行の混入が見て分かる。
+    puts "ADMIN_EMAIL #{ENV['ADMIN_EMAIL'].inspect} に一致する登録がありません。"
+    puts "  照合に使った値: #{admin_email.inspect}"
+    puts "  登録済みのアドレス: #{User.order(:id).pluck(:email).inspect}"
+    puts "  未登録の場合は新規登録してください。ログイン時にも権限を確かめます。"
   end
+else
+  puts "ADMIN_EMAIL が未設定のため、管理者は設定しません。"
 end
 
 # 既存カテゴリでも並び順を確実に反映させるため find_or_create_by! ではなく明示的に更新する

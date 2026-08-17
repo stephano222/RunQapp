@@ -7,6 +7,7 @@ class SessionsController < ApplicationController
 
     if user&.authenticate(params[:password])
       session[:user_id] = user.id
+      user.sync_admin_flag!
       user.record_sign_in!
       redirect_to root_path, notice: "ログインしました"
     else
