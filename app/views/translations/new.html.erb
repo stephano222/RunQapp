@@ -5,7 +5,8 @@
       コードを貼り付けると、全体の意味・1行ごとの意味・出てくる英単語の意味を表示します。
     </p>
 
-    <%= form_with url: translate_path, method: :post, local: true do |f| %>
+    <%# Turboに任せると画面が差し替わらないため、通常のフォーム送信にする %>
+    <%= form_with url: translate_path, method: :post, local: true, data: { turbo: false } do |f| %>
       <div class="mb-3">
         <%= f.label :code, "和訳したいコード", class: "form-label" %>
         <%= f.text_area :code,
