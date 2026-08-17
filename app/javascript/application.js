@@ -1,7 +1,6 @@
 import "@hotwired/turbo-rails"
 import "bootstrap"
 import "./typing_practice"
-import "./mini_game"
 import "./clock"
 import "./shakyo"
 import "./practice_memo"

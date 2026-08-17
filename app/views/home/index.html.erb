@@ -54,10 +54,6 @@
   <% end %>
 
   <%= link_to "復習ページへ", attempts_path, class: "btn btn-outline-danger" %>
-
-  <div class="mt-4">
-    <%= render "omikuji" %>
-  </div>
 <% else %>
   <div class="text-center py-5">
     <h1 class="display-6 mb-3">重要なRailsコードを、打って覚える。</h1>
@@ -71,6 +67,4 @@
       (ログインボタンからテストユーザーとしてお手軽にアプリをお試しできます)
     </p>
   </div>
-
-  <%= render "omikuji", poem_only: true %>
 <% end %>

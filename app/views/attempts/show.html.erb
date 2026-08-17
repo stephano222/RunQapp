@@ -51,23 +51,3 @@
   <%= link_to "他のレベルで挑戦", snippet_path(@snippet), class: "btn btn-outline-secondary" %>
   <%= link_to "復習一覧へ", attempts_path, class: "btn btn-outline-danger" %>
 </div>
-
-<div id="mini-game" class="mt-4">
-  <div class="d-flex align-items-center gap-2 flex-wrap">
-    <button type="button" id="game-start" class="btn btn-sm btn-outline-success">ひと休みミニゲーム</button>
-    <button type="button" id="game-shuffle" class="btn btn-sm btn-outline-secondary">🎲 別のゲーム</button>
-    <span class="small text-muted ms-auto" id="game-best"></span>
-  </div>
-
-  <div id="game-panel" class="d-none mt-2">
-    <div class="d-flex justify-content-between small mb-1">
-      <span id="game-stat-left"></span>
-      <span id="game-stat-right"></span>
-    </div>
-    <div id="game-stage" class="acorn-stage"></div>
-    <p class="small text-muted mt-2 mb-0">
-      <span id="game-hint"></span>
-      <span id="game-result" class="fw-bold text-success"></span>
-    </p>
-  </div>
-</div>
