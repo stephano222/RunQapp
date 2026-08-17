@@ -11,7 +11,9 @@
   </head>
 
   <body>
-    <div class="forest-bg" aria-hidden="true" style="background-image: url('<%= image_path("forest_bg.jpg") %>');"></div>
+    <%# トップページだけ夜の森、それ以外は昼の森 %>
+    <% background_image = current_page?(root_path) ? "forest_bg_night.jpg" : "forest_bg.jpg" %>
+    <div class="forest-bg" aria-hidden="true" style="background-image: url('<%= image_path(background_image) %>');"></div>
 
     <nav class="navbar navbar-expand-md navbar-dark bg-dark mb-4">
       <div class="container">
