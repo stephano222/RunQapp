@@ -2,22 +2,23 @@
   <div class="col-12 col-md-6 col-lg-4">
     <h1 class="h3 mb-4">ログイン</h1>
 
-    <div class="alert alert-info py-2 small">
-      お試し用アカウントを入力済みです。そのまま「ログイン」を押してお使いいただけます。
+    <%# 入力欄は空にしてある。試すだけならこちらから入れる %>
+    <div class="alert alert-info py-2 small mb-3">
+      登録せずに試すこともできます。
     </div>
+    <%= button_to "ゲストログイン", guest_login_path,
+                  class: "btn btn-success w-100 mb-4" %>
 
     <%= form_with url: login_path, method: :post, local: true do |f| %>
-      <%# みんなで使うお試し用アカウントなので、ブラウザに覚えさせない。
-          保存を促す確認や、他サイトへの自動入力が起きないようにする。 %>
       <div class="mb-3">
         <%= f.label :email, "メールアドレス", class: "form-label" %>
-        <%= f.email_field :email, value: User::DEMO_EMAIL, class: "form-control",
-                                  required: true, autofocus: true, autocomplete: "off" %>
+        <%= f.email_field :email, class: "form-control",
+                                  required: true, autofocus: true, autocomplete: "username" %>
       </div>
       <div class="mb-3">
         <%= f.label :password, "パスワード", class: "form-label" %>
-        <%= f.password_field :password, value: User::DEMO_PASSWORD, class: "form-control",
-                                        required: true, autocomplete: "off" %>
+        <%= f.password_field :password, class: "form-control",
+                                        required: true, autocomplete: "current-password" %>
       </div>
       <%= f.submit "ログイン", class: "btn btn-primary w-100" %>
     <% end %>
