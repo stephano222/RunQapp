@@ -232,22 +232,6 @@ main.container {
   line-height: 1.4;
 }
 
-// なぞる画面で題名の横に添える一言。
-// 題名より目立たせず、それでいて読み飛ばされない程度の強さにする。
-.practice-motto {
-  font-size: 0.82rem;
-  color: #d62828;
-  font-weight: 600;
-  border-left: 3px solid #d62828;
-  padding-left: 0.6rem;
-}
-
-@media (max-width: 576px) {
-  .practice-motto {
-    font-size: 0.76rem;
-  }
-}
-
 .typing-display {
   font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
   font-size: 1rem;
