@@ -213,13 +213,13 @@ main.container {
 }
 
 
-// 題名の上に小さく出す「何の画面か」の表示。
-// 題名を邪魔しないよう、字を小さくして字間を空ける。
+// 題名の上に出す「何の画面か」の表示。
+// 練習画面と字面が似ているため、目に入る赤で見分けをつける。
 .page-kind {
-  font-size: 0.75rem;
-  font-weight: 600;
+  font-size: 0.9rem;
+  font-weight: 700;
   letter-spacing: 0.12em;
-  color: #6c757d;
+  color: #d62828;
 }
 
 // 採点結果の「戻る」「次へ」の下に出す移動先の題名。

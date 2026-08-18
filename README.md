@@ -6,7 +6,7 @@ MVCの基本構文・ActiveRecordクエリ・Gemfile/設定コマンドなど、
 ログインすれば自分の好きなコードを追加して練習することも可能です。
 
 ## セットアップ
-
+test
 ```bash
 docker compose up -d
 docker compose exec web bundle exec rails db:create db:migrate db:seed
