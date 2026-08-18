@@ -129,6 +129,35 @@ RSpec.describe "コード" do
     end
   end
 
+  describe "PATCH /snippets/:id/memo" do
+    before { login_as(taro) }
+
+    it "自分のコードのメモを保存できる" do
+      snippet = create(:snippet, user: taro)
+
+      patch memo_snippet_path(snippet), params: { memo: "覚え書き" }
+
+      expect(snippet.reload.memo).to eq("覚え書き")
+    end
+
+    # 公式のコードは全員で共有しているので、書き換えられると他の人にも影響する。
+    it "公式のコードには保存しない" do
+      snippet = create(:snippet)
+
+      patch memo_snippet_path(snippet), params: { memo: "覚え書き" }
+
+      expect(snippet.reload.memo).to be_blank
+    end
+
+    it "他の人のコードには保存しない" do
+      snippet = create(:snippet, user: hanako)
+
+      patch memo_snippet_path(snippet), params: { memo: "覚え書き" }
+
+      expect(snippet.reload.memo).to be_blank
+    end
+  end
+
   describe "コードの追加" do
     before { login_as(taro) }
 
