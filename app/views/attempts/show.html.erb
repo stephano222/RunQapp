@@ -61,7 +61,7 @@
       <%= link_to "← 戻る",
                   practice_snippet_path(@prev_snippet, level: @attempt.level),
                   class: "btn btn-outline-secondary" %>
-      <div class="small text-muted mt-1"><%= @prev_snippet.title %></div>
+      <div class="course-nav-title mt-1"><%= @prev_snippet.title %></div>
     <% else %>
       <span class="small text-muted">これが最初のコードです</span>
     <% end %>
@@ -72,7 +72,7 @@
       <%= link_to "次へ →",
                   practice_snippet_path(@next_snippet, level: @attempt.level),
                   class: "btn btn-primary" %>
-      <div class="small text-muted mt-1"><%= @next_snippet.title %></div>
+      <div class="course-nav-title mt-1"><%= @next_snippet.title %></div>
     <% else %>
       <span class="small text-muted">これが最後のコードです。おつかれさまでした。</span>
     <% end %>
