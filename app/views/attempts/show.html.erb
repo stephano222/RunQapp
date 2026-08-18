@@ -53,16 +53,15 @@
 </div>
 
 <%# 一覧に戻らずに前後の課題へ移れるようにする。
-    難易度は今解いたものを引き継ぐ。同じレベルで続けたい場面が多いため。
+    移動先は解説のページ。先にコードと解説を見てから、
+    そこでレベルを選んで練習に入る流れにする。
     どこへ移るのか分かるよう、コードの題名も添えておく。 %>
 <%# 下端で揃える。片側にボタンが無いとき、その側の文字だけが
     上にずれて左右の高さが食い違うため。 %>
 <div class="row g-2 align-items-end mt-4 pt-3 border-top">
   <div class="col-6">
     <% if @prev_snippet %>
-      <%= link_to "← 戻る",
-                  practice_snippet_path(@prev_snippet, level: @attempt.level),
-                  class: "btn btn-outline-secondary" %>
+      <%= link_to "← 戻る", snippet_path(@prev_snippet), class: "btn btn-outline-secondary" %>
       <div class="course-nav-title mt-1"><%= @prev_snippet.title %></div>
     <% else %>
       <%# 反対側の題名と同じ箱にして、下端をきっちり揃える %>
@@ -72,9 +71,7 @@
 
   <div class="col-6 text-end">
     <% if @next_snippet %>
-      <%= link_to "次へ →",
-                  practice_snippet_path(@next_snippet, level: @attempt.level),
-                  class: "btn btn-primary" %>
+      <%= link_to "次へ →", snippet_path(@next_snippet), class: "btn btn-primary" %>
       <div class="course-nav-title mt-1"><%= @next_snippet.title %></div>
     <% else %>
       <div class="course-nav-title">これが最後のコードです。おつかれさまでした。</div>
