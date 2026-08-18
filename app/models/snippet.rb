@@ -14,6 +14,17 @@ class Snippet < ApplicationRecord
   # 一覧・カテゴリ・練習画面のいずれもこの範囲を通す。
   scope :visible_to, ->(user) { where(user_id: [nil, user&.id]) }
 
+  # 題名での絞り込み。空なら何も絞らない。
+  #
+  # 利用者が % や _ を打っても、それ自体を探す文字として扱う。
+  # そのまま渡すと「何にでも一致する記号」と解釈されてしまうため。
+  scope :search_by_title, lambda { |keyword|
+    keyword = keyword.to_s.strip
+    next all if keyword.blank?
+
+    where("title ILIKE ?", "%#{sanitize_sql_like(keyword)}%")
+  }
+
   def official?
     user_id.nil?
   end

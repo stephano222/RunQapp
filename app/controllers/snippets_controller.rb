@@ -7,9 +7,13 @@ class SnippetsController < ApplicationController
 
   def index
     @categories = Category.all
+    @keyword = params[:q].to_s.strip
+
     # カテゴリごとに分けて渡す。ビューから category.snippets を辿ると
     # 他の人が追加したコードまで含まれてしまうため。
-    @snippets_by_category = Snippet.visible_to(current_user).order(:id).group_by(&:category_id)
+    snippets = Snippet.visible_to(current_user).search_by_title(@keyword).order(:id)
+    @snippets_by_category = snippets.group_by(&:category_id)
+    @result_count = snippets.size
     # 一覧の各行に自己ベストを出すため、まとめて1回で引く
     @best_accuracy_by_snippet = current_user.attempts.group(:snippet_id).maximum(:accuracy)
     @snippet = Snippet.new

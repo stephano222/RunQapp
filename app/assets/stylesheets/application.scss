@@ -213,6 +213,152 @@ main.container {
 }
 
 
+// 続けた記録。トップページの一番上に置く。
+//
+// 森の緑を基調にして、周りのカードから浮かせる。
+// 数字を主役にしたいので、飾りは最小限にとどめる。
+.streak-panel {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 2rem;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(135deg, #f2f8f2 0%, #eaf3ec 100%);
+  border: 1px solid #d5e5d8;
+  border-radius: 1rem;
+  padding: 1.4rem 1.6rem;
+}
+
+.streak-count {
+  display: flex;
+  align-items: baseline;
+  gap: 0.25rem;
+  line-height: 1;
+}
+
+.streak-number {
+  font-size: 3.4rem;
+  font-weight: 700;
+  color: #2f6b4f;
+  // 数字の幅を揃え、日数が変わっても位置が揺れないようにする
+  font-variant-numeric: tabular-nums;
+}
+
+.streak-unit {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2f6b4f;
+}
+
+.streak-caption {
+  font-size: 0.85rem;
+  color: #4a5751;
+  margin-top: 0.35rem;
+}
+
+// 今週の7日。塗られた丸が練習した日。
+.week-strip {
+  display: flex;
+  gap: 0.55rem;
+  list-style: none;
+  padding: 0;
+  margin: 0.9rem 0 0;
+}
+
+.week-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.28rem;
+}
+
+.week-day-label {
+  font-size: 0.68rem;
+  color: #7d8a84;
+  line-height: 1;
+}
+
+.week-day-dot {
+  width: 1.05rem;
+  height: 1.05rem;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 1.5px solid #c3d6c7;
+}
+
+.week-day.is-done .week-day-dot {
+  background: #2f6b4f;
+  border-color: #2f6b4f;
+}
+
+// 今日は輪郭で示す。塗りつぶしと重ならないので、
+// 「今日やった」「今日はまだ」の両方が同時に読み取れる。
+.week-day.is-today .week-day-dot {
+  box-shadow: 0 0 0 2px #f2f8f2, 0 0 0 3.5px #d62828;
+}
+
+.week-day.is-future .week-day-dot {
+  border-style: dashed;
+  border-color: #dce7de;
+}
+
+.streak-stats {
+  display: flex;
+  gap: 1.6rem;
+}
+
+.streak-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+.streak-stat-number {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #212529;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+.streak-stat-number.is-alert {
+  color: #d62828;
+}
+
+.streak-stat-label {
+  font-size: 0.72rem;
+  color: #6c757d;
+}
+
+@media (max-width: 576px) {
+  .streak-panel {
+    padding: 1.1rem 1.2rem;
+    gap: 1rem;
+  }
+
+  .streak-number { font-size: 2.8rem; }
+
+  // 狭い画面では数字3つを横いっぱいに散らす
+  .streak-stats {
+    width: 100%;
+    justify-content: space-around;
+    gap: 0.5rem;
+    padding-top: 0.9rem;
+    border-top: 1px solid #d5e5d8;
+  }
+}
+
+// コードの絞り込み
+.snippet-search .form-control {
+  max-width: 32rem;
+}
+
+.search-summary {
+  font-size: 0.88rem;
+  color: #4a5751;
+}
+
 // 題名の上に出す「何の画面か」の表示。
 // 練習画面と字面が似ているため、目に入る赤で見分けをつける。
 .page-kind {

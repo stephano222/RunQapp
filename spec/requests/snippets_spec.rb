@@ -37,6 +37,49 @@ RSpec.describe "コード" do
     end
   end
 
+  describe "GET /snippets の絞り込み" do
+    let!(:validation) { create(:snippet, title: "バリデーション") }
+    let!(:resources) { create(:snippet, title: "resources") }
+
+    before { login_as(taro) }
+
+    it "一致したコードだけを載せる" do
+      get snippets_path, params: { q: "バリデーション" }
+
+      expect(response.body).to include("バリデーション")
+      expect(response.body).not_to include(">resources<")
+    end
+
+    it "件数を知らせる" do
+      get snippets_path, params: { q: "バリデーション" }
+
+      expect(response.body).to include("1")
+      expect(response.body).to include("絞り込みを外す")
+    end
+
+    it "一致しなければその旨を伝える" do
+      get snippets_path, params: { q: "存在しない言葉" }
+
+      expect(response.body).to include("一致するコードがありませんでした")
+    end
+
+    it "絞り込まなければ全部載せる" do
+      get snippets_path
+
+      expect(response.body).to include("バリデーション")
+      expect(response.body).to include("resources")
+    end
+
+    # 絞り込みは公開範囲より後に効く。順序を取り違えると他人のコードが漏れる。
+    it "絞り込んでも他の人のコードは出さない" do
+      create(:snippet, title: "花子のバリデーション", user: hanako)
+
+      get snippets_path, params: { q: "バリデーション" }
+
+      expect(response.body).not_to include("花子のバリデーション")
+    end
+  end
+
   describe "GET /snippets/:id" do
     before { login_as(taro) }
 

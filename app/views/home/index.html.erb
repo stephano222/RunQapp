@@ -1,24 +1,60 @@
 <% if logged_in? %>
   <h1 class="h3 mb-4">ようこそ、<%= current_user.name %>さん</h1>
 
-  <div class="row mb-4">
-    <div class="col-6 col-md-4">
-      <div class="card text-center">
-        <div class="card-body">
-          <div class="display-6"><%= current_user.attempts.count %></div>
-          <div class="text-muted">練習回数</div>
-        </div>
+  <%# 続けられているかを一目で見せる。
+      左に「続いた日数」と今週の曜日、右に数字を3つ並べる。
+      日数だけを大きく置くのは、続けること自体を目当てにしてほしいため。 %>
+  <section class="streak-panel mb-4">
+    <div class="streak-main">
+      <div class="streak-count">
+        <span class="streak-number"><%= @streak %></span>
+        <span class="streak-unit">日</span>
+      </div>
+      <p class="streak-caption mb-0">
+        <% if @streak.zero? %>
+          今日から始めましょう
+        <% elsif @practiced_days.include?(Time.zone.today) %>
+          続けています。今日も達成
+        <% else %>
+          続いています。今日はまだです
+        <% end %>
+      </p>
+
+      <%# 今週の7日。塗られた丸が練習した日。 %>
+      <ol class="week-strip" aria-label="今週の練習した日">
+        <% @this_week.each do |day| %>
+          <%
+            done = @practiced_days.include?(day)
+            today = day == Time.zone.today
+            future = day > Time.zone.today
+          %>
+          <li class="week-day <%= "is-done" if done %> <%= "is-today" if today %> <%= "is-future" if future %>">
+            <span class="week-day-label"><%= %w[月 火 水 木 金 土 日][day.wday == 0 ? 6 : day.wday - 1] %></span>
+            <span class="week-day-dot" aria-hidden="true"></span>
+            <span class="visually-hidden">
+              <%= l(day, format: "%-m月%-d日") rescue day.strftime("%-m月%-d日") %>
+              <%= done ? "練習しました" : "練習していません" %>
+            </span>
+          </li>
+        <% end %>
+      </ol>
+    </div>
+
+    <div class="streak-stats">
+      <div class="streak-stat">
+        <span class="streak-stat-number"><%= @attempts_this_week %></span>
+        <span class="streak-stat-label">今週の問題</span>
+      </div>
+      <div class="streak-stat">
+        <span class="streak-stat-number"><%= current_user.attempts.count %></span>
+        <span class="streak-stat-label">通算</span>
+      </div>
+      <div class="streak-stat">
+        <span class="streak-stat-number <%= "is-alert" if @review_count.positive? %>"><%= @review_count %></span>
+        <span class="streak-stat-label">要復習</span>
       </div>
     </div>
-    <div class="col-6 col-md-4">
-      <div class="card text-center">
-        <div class="card-body">
-          <div class="display-6 text-danger"><%= @review_count %></div>
-          <div class="text-muted">要復習</div>
-        </div>
-      </div>
-    </div>
-  </div>
+  </section>
 
   <div class="d-flex justify-content-between align-items-center mb-3">
     <h2 class="h5 mb-0">カテゴリから練習する</h2>
