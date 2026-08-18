@@ -16,6 +16,11 @@
   <% end %>
 </div>
 
+<%# 解説を読み終えるまで待たずに、ここからすぐ練習へ入れるようにする %>
+<div class="mb-3">
+  <%= render "snippets/practice_buttons", snippet: @snippet %>
+</div>
+
 <pre class="typing-display mb-3"><%= @snippet.code %></pre>
 
 <% if @snippet.memo.present? %>
@@ -38,10 +43,8 @@
   </div>
 <% end %>
 
-<div class="d-flex gap-2 flex-wrap mb-4">
-  <%= link_to "優しいレベルで練習", practice_snippet_path(@snippet, level: "easy"), class: "btn btn-success" %>
-  <%= link_to "普通レベルで練習", practice_snippet_path(@snippet, level: "normal"), class: "btn btn-warning" %>
-  <%= link_to "難しいレベルで練習", practice_snippet_path(@snippet, level: "hard"), class: "btn btn-danger" %>
+<div class="mb-4">
+  <%= render "snippets/practice_buttons", snippet: @snippet %>
 </div>
 
 <% if @attempts.any? %>

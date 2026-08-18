@@ -1,0 +1,8 @@
+<%# レベルを選んで練習へ入るボタン。
+    解説を読む前でも読んだ後でも始められるよう、画面の上下の両方に置く。
+    文言が食い違わないよう部品にまとめている。 %>
+<div class="d-flex gap-2 flex-wrap">
+  <%= link_to "優しいレベルで練習", practice_snippet_path(snippet, level: "easy"), class: "btn btn-success" %>
+  <%= link_to "普通レベルで練習", practice_snippet_path(snippet, level: "normal"), class: "btn btn-warning" %>
+  <%= link_to "難しいレベルで練習", practice_snippet_path(snippet, level: "hard"), class: "btn btn-danger" %>
+</div>
