@@ -43,7 +43,7 @@
       <tbody>
         <% @summaries.each do |summary| %>
           <tr>
-            <td><%= summary.snippet.title %></td>
+            <td><%= link_to summary.snippet.title, snippet_path(summary.snippet) %></td>
             <td><%= summary.snippet.category.name %></td>
             <td><%= summary.try_count %></td>
             <td>

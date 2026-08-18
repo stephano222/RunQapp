@@ -1,11 +1,11 @@
 <%# 一覧に並べる1件分。コード一覧とカテゴリの画面の両方から使う。
-    解説は採点結果の画面で読めるため、詳細ページを挟まずに
-    その場でレベルを選んで練習へ入れるようにしている。 %>
+    題名からは解説のページへ、右のボタンからはその場で練習へ入れる。
+    先に解説を読みたいときと、すぐ打ち始めたいときの両方に応える。 %>
 <div class="list-group-item">
   <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
     <div>
       <h3 class="h6 mb-1">
-        <%= snippet.title %>
+        <%= link_to snippet.title, snippet_path(snippet) %>
         <% unless snippet.official? %>
           <span class="badge bg-info text-dark ms-1">自分で追加</span>
         <% end %>
@@ -17,11 +17,6 @@
         </span>
       <% else %>
         <span class="badge bg-secondary">未挑戦</span>
-      <% end %>
-
-      <%# 自分で追加したコードの手直しは、一覧からしか辿れなくなるためここに置く %>
-      <% if snippet.editable_by?(current_user) %>
-        <%= link_to "編集", edit_snippet_path(snippet), class: "small ms-2" %>
       <% end %>
     </div>
 
