@@ -1,7 +1,19 @@
-<p><%= link_to "← コード一覧", snippets_path %></p>
+<%# 戻る導線と同じ行に練習のボタンを並べる。
+    解説や和訳を読み飛ばして下まで送らなくても、ここから打ち始められる。 %>
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+  <%= link_to "← コード一覧", snippets_path %>
+
+  <div class="d-flex gap-2 flex-wrap">
+    <%= link_to "優しいレベルで練習", practice_snippet_path(@snippet, level: "easy"), class: "btn btn-success" %>
+    <%= link_to "普通レベルで練習", practice_snippet_path(@snippet, level: "normal"), class: "btn btn-warning" %>
+    <%= link_to "難しいレベルで練習", practice_snippet_path(@snippet, level: "hard"), class: "btn btn-danger" %>
+  </div>
+</div>
 
 <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-2">
   <div>
+    <%# 練習画面と見分けがつくよう、何の画面かを題名の上に示す %>
+    <p class="page-kind mb-1">解説ページ</p>
     <h1 class="h4 mb-1"><%= @snippet.title %></h1>
     <span class="badge bg-secondary"><%= @snippet.category.name %></span>
     <% unless @snippet.official? %>
@@ -14,11 +26,6 @@
       <%= button_to "削除", snippet_path(@snippet), method: :delete, class: "btn btn-outline-danger", form: { data: { turbo_confirm: "削除しますか?" } } %>
     </div>
   <% end %>
-</div>
-
-<%# 解説を読み終えるまで待たずに、ここからすぐ練習へ入れるようにする %>
-<div class="mb-3">
-  <%= render "snippets/practice_buttons", snippet: @snippet %>
 </div>
 
 <pre class="typing-display mb-3"><%= @snippet.code %></pre>
@@ -42,10 +49,6 @@
     </div>
   </div>
 <% end %>
-
-<div class="mb-4">
-  <%= render "snippets/practice_buttons", snippet: @snippet %>
-</div>
 
 <% if @attempts.any? %>
   <h2 class="h6">最近の挑戦履歴</h2>
