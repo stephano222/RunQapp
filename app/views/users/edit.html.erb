@@ -22,8 +22,10 @@
         <%= f.email_field :email, class: "form-control", required: true %>
       </div>
       <div class="mb-3">
-        <%= f.label :password, "新しいパスワード(変更する場合のみ)", class: "form-label" %>
-        <%= f.password_field :password, class: "form-control", minlength: 6 %>
+        <%= f.label :password, "新しいパスワード(変更する場合のみ・#{User::MINIMUM_PASSWORD_LENGTH}文字以上)", class: "form-label" %>
+        <%= f.password_field :password, class: "form-control",
+                                        minlength: User::MINIMUM_PASSWORD_LENGTH,
+                                        autocomplete: "new-password" %>
       </div>
       <%= f.submit "更新する", class: "btn btn-primary w-100" %>
     <% end %>

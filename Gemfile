@@ -85,3 +85,6 @@ end
 gem 'kaminari', '1.2.2'
 gem 'bootstrap5-kaminari-views'
 gem 'ransack', '3.2.1'
+
+# ログインの試行回数を制限する。パスワードの総当たりを防ぐため。
+gem 'rack-attack'

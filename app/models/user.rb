@@ -23,7 +23,21 @@ class User < ApplicationRecord
   validates :name, presence: true, length: { maximum: 30 }
   validates :email, presence: true, uniqueness: true,
                      format: { with: URI::MailTo::EMAIL_REGEXP }
-  validates :password, length: { minimum: 6 }, allow_nil: true
+  # 6文字だと 123456 のようなありふれたものが通ってしまう。
+  # 短いほど総当たりで破られやすくなるため、8文字を下限にする。
+  MINIMUM_PASSWORD_LENGTH = 8
+
+  # よく使われるパスワード。流出一覧の上位に必ず載っており、
+  # 総当たりでは真っ先に試される。長さを満たしていても断る。
+  COMMON_PASSWORDS = %w[
+    password password1 password123 12345678 123456789 1234567890
+    qwerty123 qwertyui abc12345 11111111 00000000 iloveyou
+    admin123 welcome1 letmein1 football baseball sunshine
+    princess passw0rd trustno1 dragon123
+  ].freeze
+
+  validates :password, length: { minimum: MINIMUM_PASSWORD_LENGTH }, allow_nil: true
+  validate :password_is_not_too_common
 
   # 管理者にするアドレス。環境変数 ADMIN_EMAIL で指定する。
   # 管理画面などに貼り付けると前後に空白や改行が紛れ込みやすく、
@@ -93,5 +107,15 @@ class User < ApplicationRecord
       sign_in_count: sign_in_count + 1,
       last_sign_in_at: Time.current
     )
+  end
+
+  private
+
+  # 大文字小文字を変えただけの Password123 なども同じ扱いにする。
+  def password_is_not_too_common
+    return if password.blank?
+    return unless COMMON_PASSWORDS.include?(password.downcase)
+
+    errors.add(:password, "はよく使われていて危険です。別の文字列にしてください")
   end
 end

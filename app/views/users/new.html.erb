@@ -22,8 +22,14 @@
         <%= f.email_field :email, class: "form-control", required: true %>
       </div>
       <div class="mb-3">
-        <%= f.label :password, "パスワード(6文字以上)", class: "form-label" %>
-        <%= f.password_field :password, class: "form-control", required: true, minlength: 6 %>
+        <%# 条件をモデルの定数から出す。片方だけ直して食い違うのを防ぐ %>
+        <%= f.label :password, "パスワード(#{User::MINIMUM_PASSWORD_LENGTH}文字以上)", class: "form-label" %>
+        <%= f.password_field :password, class: "form-control", required: true,
+                                        minlength: User::MINIMUM_PASSWORD_LENGTH,
+                                        autocomplete: "new-password" %>
+        <div class="form-text">
+          推測されにくい文字列にしてください。よく使われるものは登録できません。
+        </div>
       </div>
       <%= f.submit "登録する", class: "btn btn-primary w-100" %>
     <% end %>
