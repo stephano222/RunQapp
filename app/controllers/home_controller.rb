@@ -12,6 +12,9 @@ class HomeController < ApplicationController
     @attempts_this_week = current_user.attempts_this_week
     @practiced_days = current_user.practiced_days_this_week
     @this_week = Time.zone.today.beginning_of_week..Time.zone.today.end_of_week
+
+    # 何をやろうか迷わずに始められるよう、こちらから差し出す
+    @recommendations = PracticeRecommender.new(current_user).due(limit: 5)
     @review_count = current_user.attempts.where("accuracy < ?", Attempt::REVIEW_THRESHOLD).select(:snippet_id).distinct.count
   end
 end

@@ -77,6 +77,60 @@ RSpec.describe "トップページ" do
       end
     end
 
+    context "今日の練習" do
+      let(:category) { create(:category, position: 1) }
+
+      it "まだ打っていないコードを勧める" do
+        create(:snippet, title: "はじめてのコード", category: category)
+
+        get root_path
+
+        expect(response.body).to include("今日の練習")
+        expect(response.body).to include("はじめてのコード")
+      end
+
+      it "勧めた理由を添える" do
+        create(:snippet, category: category)
+
+        get root_path
+
+        expect(response.body).to include("はじめて")
+      end
+
+      it "前回できなかったものは理由を色分けする" do
+        snippet = create(:snippet, category: category)
+        create(:attempt, :needs_review, user: user, snippet: snippet, created_at: 3.days.ago)
+
+        get root_path
+
+        expect(response.body).to include("is-review")
+      end
+
+      it "5件までしか並べない" do
+        create_list(:snippet, 10, category: category)
+
+        get root_path
+
+        expect(response.body.scan('class="today-item"').size).to eq(5)
+      end
+
+      it "前回のレベルで練習に入れる" do
+        snippet = create(:snippet, category: category)
+        create(:attempt, user: user, snippet: snippet, level: "hard",
+                         accuracy: 60, created_at: 3.days.ago)
+
+        get root_path
+
+        expect(response.body).to include(practice_snippet_path(snippet, level: "hard"))
+      end
+
+      it "勧めるものが無ければ欄ごと出さない" do
+        get root_path
+
+        expect(response.body).not_to include("今日の練習")
+      end
+    end
+
     it "他の人の記録は数えない" do
       create(:attempt, user: create(:user), created_at: Time.zone.now)
 

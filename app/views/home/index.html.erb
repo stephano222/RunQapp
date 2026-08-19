@@ -56,6 +56,34 @@
     </div>
   </section>
 
+  <%# 何をやろうか迷わずに始められるよう、こちらから差し出す。
+      なぜ勧められたのかを添える。理由が分からないまま出されると、
+      選ばされている感じがして続かない。 %>
+  <% if @recommendations.any? %>
+    <section class="today-panel mb-4">
+      <div class="d-flex justify-content-between align-items-baseline flex-wrap gap-2 mb-3">
+        <h2 class="h5 mb-0">今日の練習</h2>
+        <span class="today-note">忘れかけた頃のものと、まだ打っていないものから選びました</span>
+      </div>
+
+      <ol class="today-list">
+        <% @recommendations.each do |item| %>
+          <li class="today-item">
+            <div class="today-item-body">
+              <span class="today-title"><%= item.snippet.title %></span>
+              <span class="today-reason <%= "is-review" if item.last_accuracy && item.last_accuracy < Attempt::REVIEW_THRESHOLD %>">
+                <%= item.reason %>
+              </span>
+            </div>
+            <%= link_to "練習する",
+                        practice_snippet_path(item.snippet, level: item.level),
+                        class: "btn btn-sm btn-success" %>
+          </li>
+        <% end %>
+      </ol>
+    </section>
+  <% end %>
+
   <div class="d-flex justify-content-between align-items-center mb-3">
     <h2 class="h5 mb-0">カテゴリから練習する</h2>
     <%= link_to "全てのコードを見る", snippets_path, class: "btn btn-sm btn-outline-secondary" %>

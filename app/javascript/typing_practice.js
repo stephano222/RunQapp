@@ -48,12 +48,89 @@ class TypingApp {
     // 優しいレベルは最初からお手本が出ているので、押した状態から始める
     this.revealed = this.level === "easy"
 
+    // 打ちかけの保存先。コードとレベルごとに分ける。
+    // 同じコードでもレベルが違えば別の挑戦として扱う。
+    this.draftKey = `runq:typing:${this.data.snippetId}:${this.level}`
+
     this.bind()
     this.buildThemeOptions()
     this.updateSoundToggleLabel()
     this.updateRevealToggleLabel()
-    this.renderTarget("")
+    this.restoreDraft()
     this.input.focus()
+  }
+
+  // 打ちかけを読み戻す。
+  //
+  // 長いコードの途中で誤って画面を閉じると、それまで打った分が消える。
+  // 打ち直す気力が続かず、そこで練習が途切れてしまう。
+  //
+  // ただし時間とミス数までは引き継がない。中断した時間を計れないうえ、
+  // 一度閉じてから続きを打った記録を成績として残すのは正確でない。
+  restoreDraft() {
+    const saved = this.readDraft()
+
+    if (!saved) {
+      this.renderTarget("")
+      return
+    }
+
+    this.input.value = saved
+    this.previousValue = saved
+    this.renderTarget(saved)
+    this.updateStats(saved)
+    this.showDraftNotice()
+    // 続きから打てるよう、カーソルを末尾に置く
+    this.input.setSelectionRange(saved.length, saved.length)
+  }
+
+  readDraft() {
+    try {
+      const saved = localStorage.getItem(this.draftKey)
+      // 打ち終えた分がそのまま残っていると、開いた瞬間に採点が走ってしまう
+      if (!saved || saved.length >= this.target.length) return null
+      return saved
+    } catch (e) {
+      // 保存領域が使えない設定でも、練習そのものは続けられるようにする
+      return null
+    }
+  }
+
+  saveDraft(value) {
+    try {
+      if (value.length === 0) {
+        localStorage.removeItem(this.draftKey)
+      } else {
+        localStorage.setItem(this.draftKey, value)
+      }
+    } catch (e) {
+      // 保存できなくても打つのは妨げない
+    }
+  }
+
+  clearDraft() {
+    try {
+      localStorage.removeItem(this.draftKey)
+    } catch (e) {
+      // 何もしない
+    }
+    this.hideDraftNotice()
+  }
+
+  // 勝手に文字が入っていると驚くので、続きからだと分かるようにする
+  showDraftNotice() {
+    if (this.draftNotice) return
+
+    this.draftNotice = document.createElement("div")
+    this.draftNotice.className = "draft-notice"
+    this.draftNotice.textContent = "前回の続きから再開しています"
+    this.input.insertAdjacentElement("afterend", this.draftNotice)
+  }
+
+  hideDraftNotice() {
+    if (!this.draftNotice) return
+    this.draftNotice.remove()
+    this.draftNotice = null
   }
 
   buildThemeOptions() {
@@ -112,6 +189,7 @@ class TypingApp {
     this.mistakeCount = 0
     this.startTime = null
     this.sound.reset()
+    this.clearDraft()
     this.input.value = ""
     this.input.disabled = false
     this.stopTimer()
@@ -164,6 +242,7 @@ class TypingApp {
     this.previousValue = value
     this.renderTarget(value)
     this.updateStats(value)
+    this.saveDraft(value)
 
     if (value.length >= this.target.length) {
       this.finish(value)
@@ -249,6 +328,8 @@ class TypingApp {
     this.finished = true
     this.stopTimer()
     this.input.disabled = true
+    // 打ち終えたので、途中の記録は残さない
+    this.clearDraft()
 
     const durationMs = this.startTime ? Math.round(performance.now() - this.startTime) : 0
     const total = this.target.length
