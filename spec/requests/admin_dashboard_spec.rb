@@ -20,9 +20,9 @@ RSpec.describe "利用状況" do
       expect(response).to redirect_to(root_path)
     end
 
-    # 誰でも入れるお試し用アカウントに権限が付くと、利用状況が全員に見える。
-    it "お試し用アカウントは見られない" do
-      guest = create(:user, email: User::DEMO_EMAIL, password: "password1234")
+    # 誰でも入れるゲストに権限が付くと、利用状況が全員に見える。
+    it "ゲスト用のアカウントは見られない" do
+      guest = create(:user, email: User::GUEST_EMAIL, password: "password1234")
       login_as(guest)
 
       get admin_dashboard_path

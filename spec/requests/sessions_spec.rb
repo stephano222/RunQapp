@@ -55,15 +55,15 @@ RSpec.describe "ログイン" do
   end
 
   describe "POST /guest_login" do
-    context "お試し用アカウントがあるとき" do
-      let!(:guest) { create(:user, email: User::DEMO_EMAIL, name: "テストユーザー") }
+    context "ゲスト用のアカウントがあるとき" do
+      let!(:guest) { create(:user, email: User::GUEST_EMAIL, name: User::GUEST_NAME) }
 
       it "何も入力せずにログインできる" do
         post guest_login_path
 
         expect(response).to redirect_to(root_path)
         follow_redirect!
-        expect(response.body).to include("テストユーザー")
+        expect(response.body).to include(User::GUEST_NAME)
       end
 
       # 誰でも入れるアカウントなので、利用状況が見えてしまうと困る。
@@ -78,7 +78,7 @@ RSpec.describe "ログイン" do
       end
     end
 
-    context "お試し用アカウントが無いとき" do
+    context "ゲスト用のアカウントが無いとき" do
       it "ログイン画面へ戻して知らせる" do
         post guest_login_path
 

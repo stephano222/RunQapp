@@ -16,10 +16,10 @@ class SessionsController < ApplicationController
     end
   end
 
-  # お試し用アカウントに、メールアドレスもパスワードも打たずに入る。
+  # ゲスト用のアカウントに、メールアドレスもパスワードも打たずに入る。
   # 中身はログインと同じで、入力の手間を省くだけ。
   def guest
-    user = User.find_by(email: User::DEMO_EMAIL)
+    user = User.find_by(email: User::GUEST_EMAIL)
 
     if user
       session[:user_id] = user.id
@@ -28,7 +28,7 @@ class SessionsController < ApplicationController
       redirect_to root_path, notice: "ゲストとしてログインしました"
     else
       # シードが流れていない環境では用意されていないことがある
-      redirect_to login_path, alert: "お試し用アカウントが見つかりませんでした"
+      redirect_to login_path, alert: "ゲスト用のアカウントが見つかりませんでした"
     end
   end
 

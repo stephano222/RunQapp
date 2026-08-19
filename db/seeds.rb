@@ -1,15 +1,22 @@
 # 初期データ: 覚えておきたい重要なRailsコード集
 # 既存の公式コード(user_idがnil)だけを入れ替える。ユーザーが追加したコードは消さない。
 
-# 誰でも試せるテストユーザー(ログイン画面に初めから入力されている)
-test_user = User.find_or_initialize_by(email: User::DEMO_EMAIL)
-test_user.name = "テストユーザー"
-test_user.password = User::DEMO_PASSWORD
-test_user.save!
+# 誰でも試せるゲスト用のアカウント。
+#
+# 以前は別のアドレスで作っていた。新しく作り直すと、古いほうが
+# 誰にも使われないまま残り続けるので、あれば引き継いで名前を変える。
+guest = User.find_by(email: User::GUEST_EMAIL) ||
+        User.find_by(email: User::FORMER_GUEST_EMAIL) ||
+        User.new
 
-# このアカウントはログイン画面にパスワードが表示されており誰でも入れる。
-# 管理者権限を持たせると利用状況が全員に見えてしまうため、必ず外す。
-test_user.update_columns(admin: false) if test_user.admin?
+guest.name = User::GUEST_NAME
+guest.email = User::GUEST_EMAIL
+guest.password = User::GUEST_PASSWORD
+guest.save!
+
+# このアカウントは誰でも入れる。管理者権限を持たせると
+# 利用状況が全員に見えてしまうため、必ず外す。
+guest.update_columns(admin: false) if guest.admin?
 
 # 管理者アカウント。メールアドレスを環境変数で渡したときだけ権限を与える。
 # パスワードはこのファイルに書かず、各自が新規登録した上で指定する。
