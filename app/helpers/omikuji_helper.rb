@@ -1,16 +1,11 @@
 module OmikujiHelper
-  # 神社のおみくじにならい、運勢と和歌を一組で表示する。
-  # 和歌はいずれも著作権の保護期間が終了した古典から引用している。
-  FORTUNES = [
-    { level: "大吉", color: "danger" },
-    { level: "吉",   color: "success" },
-    { level: "中吉", color: "success" },
-    { level: "小吉", color: "primary" },
-    { level: "末吉", color: "secondary" },
-    { level: "凶",   color: "dark" }
-  ].freeze
-
-
+  # ログイン後のトップページに一言を添える。
+  #
+  # 運勢(大吉・凶など)は取りやめた。学習アプリの入り口で
+  # 「凶」と出ても、その日の練習に何の役にも立たないため。
+  #
+  # 聖書からの引用は、現代の翻訳に著作権が存続しているため引用せず、
+  # 原典の意味をふまえて独自に現代語へ訳している(出典に「意訳」と明記)。
   WORDS = [
     { text: "急がば回れ。基本を飛ばさぬ者が、いちばん早く着く。", source: nil },
     { text: "覚えるより、慣れよ。指が覚えたものは忘れない。", source: nil },
@@ -63,11 +58,8 @@ module OmikujiHelper
       source: "ヨハネによる福音書 16章33節(意訳)" }
   ].freeze
 
-  # 開くたびに引き直せるおみくじ。運勢と言葉を独立に選ぶ。
-  def omikuji_of_the_day
-    {
-      fortune: FORTUNES.sample,
-      word: WORDS.sample
-    }
+  # 開くたびに引き直せる。同じ言葉ばかり出ないよう毎回選び直す。
+  def word_of_the_day
+    WORDS.sample
   end
 end

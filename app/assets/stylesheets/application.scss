@@ -189,7 +189,7 @@ main.container {
   color: #9aa3af;
 }
 
-// おみくじ(今日の運勢・今日の言葉)
+// 今日の言葉
 .omikuji-card {
   background: #fffdf6;
   border: 1px solid #e0d5b8;
@@ -205,11 +205,19 @@ main.container {
   color: #8a7550;
 }
 
-.omikuji-fortune {
-  font-size: 2.6rem;
-  font-weight: 700;
-  line-height: 1.2;
+// 運勢を消して言葉だけになったので、その分だけ言葉を大きく見せる。
+// 読ませたいのは文なので、明朝体でゆったり組む。
+.omikuji-word {
+  font-size: 1.15rem;
+  line-height: 1.9;
   font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
+  color: #3d3527;
+}
+
+@media (max-width: 576px) {
+  .omikuji-word {
+    font-size: 1.02rem;
+  }
 }
 
 

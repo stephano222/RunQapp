@@ -1,30 +1,22 @@
-<%# ログイン後のトップページに出す、今日の運勢と今日の言葉 %>
-<% omikuji = omikuji_of_the_day %>
+<%# ログイン後のトップページに出す、今日の言葉 %>
+<% word = word_of_the_day %>
 
 <div class="row justify-content-center">
   <div class="col-12 col-lg-8">
     <div class="omikuji-card">
-      <div class="text-center mb-3">
-        <div class="omikuji-heading">今日の運勢</div>
-        <div class="omikuji-fortune text-<%= omikuji[:fortune][:color] %>">
-          <%= omikuji[:fortune][:level] %>
-        </div>
-        <div class="text-muted small"><%= l Date.current, format: "%Y年%-m月%-d日" %></div>
-      </div>
-
-      <hr class="my-3">
-
       <div class="text-center">
         <div class="omikuji-heading mb-1">今日の言葉</div>
-        <p class="mb-1"><%= omikuji[:word][:text] %></p>
-        <% if omikuji[:word][:source] %>
-          <p class="small text-muted mb-0">— <%= omikuji[:word][:source] %></p>
+        <div class="text-muted small mb-3"><%= l Date.current, format: "%Y年%-m月%-d日" %></div>
+
+        <p class="omikuji-word mb-1"><%= word[:text] %></p>
+        <% if word[:source] %>
+          <p class="small text-muted mb-0">— <%= word[:source] %></p>
         <% end %>
       </div>
 
       <div class="text-center mt-3">
-        <%# Turboのキャッシュで前回の結果が一瞬見えるのを防ぐため、通常の遷移にする %>
-        <%= link_to "🎋 もう一度引く", root_path,
+        <%# Turboのキャッシュで前回の言葉が一瞬見えるのを防ぐため、通常の遷移にする %>
+        <%= link_to "🎋 次の言葉を見る", root_path,
                     class: "btn btn-sm btn-outline-danger",
                     data: { turbo: false } %>
       </div>
